@@ -1,0 +1,6 @@
+framework module AsyncCoreData {
+  umbrella header "AsyncCoreData-umbrella.h"
+
+  export *
+  module * { export * }
+}

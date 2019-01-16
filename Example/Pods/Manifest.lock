@@ -1,0 +1,16 @@
+PODS:
+  - AsyncCoreData (0.1.0)
+
+DEPENDENCIES:
+  - AsyncCoreData (from `../`)
+
+EXTERNAL SOURCES:
+  AsyncCoreData:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  AsyncCoreData: 12e3669a934dec29e93afb6119b9e74922f0f620
+
+PODFILE CHECKSUM: 02e78553917ef86134b8a16ad4e672bf74c57eec
+
+COCOAPODS: 1.6.0.beta.1

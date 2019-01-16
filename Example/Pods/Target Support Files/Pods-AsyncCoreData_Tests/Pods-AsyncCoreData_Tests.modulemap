@@ -1,0 +1,6 @@
+framework module Pods_AsyncCoreData_Tests {
+  umbrella header "Pods-AsyncCoreData_Tests-umbrella.h"
+
+  export *
+  module * { export * }
+}

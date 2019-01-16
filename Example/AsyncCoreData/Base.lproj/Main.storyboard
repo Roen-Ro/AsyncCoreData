@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="whP-gf-Uak">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="wQg-tq-qST">
+            <objects>
+                <viewController id="whP-gf-Uak" customClass="RRViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="uEw-UM-LJ8"/>
+                        <viewControllerLayoutGuide type="bottom" id="Mvr-aV-6Um"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="TpU-gO-2f1">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <segmentedControl opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="dDZ-bn-am0">
+                                <rect key="frame" x="36" y="67" width="302" height="29"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <segments>
+                                    <segment title="Store A"/>
+                                    <segment title="Store B"/>
+                                    <segment title="Store C"/>
+                                </segments>
+                                <connections>
+                                    <action selector="dataStoreChange:" destination="whP-gf-Uak" eventType="valueChanged" id="lAk-9p-Qxq"/>
+                                </connections>
+                            </segmentedControl>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="X4a-wh-Mpu">
+                                <rect key="frame" x="81" y="168" width="212" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <state key="normal" title="Write Data"/>
+                                <connections>
+                                    <action selector="writeData:" destination="whP-gf-Uak" eventType="touchUpInside" id="Lzp-kg-kdK"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HhY-c7-t9g">
+                                <rect key="frame" x="81" y="219" width="211" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <state key="normal" title="Read Data"/>
+                                <connections>
+                                    <action selector="readData:" destination="whP-gf-Uak" eventType="touchUpInside" id="Tx2-fa-7Dx"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Gtv-93-4Ff">
+                                <rect key="frame" x="81" y="276" width="211" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <state key="normal" title="Write Data Async"/>
+                                <connections>
+                                    <action selector="writeDataAsync:" destination="whP-gf-Uak" eventType="touchUpInside" id="Wgv-t0-MUN"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ahl-7W-GwA">
+                                <rect key="frame" x="82" y="334" width="211" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <state key="normal" title="Read Data Async"/>
+                                <connections>
+                                    <action selector="readDataAsync:" destination="whP-gf-Uak" eventType="touchUpInside" id="Xnz-kr-j8s"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="y4q-sk-f0D">
+                                <rect key="frame" x="38" y="575" width="298" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" red="1" green="0.25565384333290564" blue="0.11103196287448769" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <state key="normal" title="Clear Data Base"/>
+                                <connections>
+                                    <action selector="clearAllData:" destination="whP-gf-Uak" eventType="touchUpInside" id="NRd-PB-5wA"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3ej-ao-H8W">
+                                <rect key="frame" x="68" y="103" width="236" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" red="0.97819048387625573" green="1" blue="0.82866789120123419" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <state key="normal" title="Change to same store test"/>
+                                <connections>
+                                    <action selector="changeToCurrentStore:" destination="whP-gf-Uak" eventType="touchUpInside" id="US1-NS-NdO"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" name="selectedTextBackgroundColor" catalog="System" colorSpace="catalog"/>
+                    </view>
+                    <connections>
+                        <outlet property="segControl" destination="dDZ-bn-am0" id="ixe-Xi-5SA"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="tc2-Qw-aMS" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="304.80000000000001" y="432.23388305847078"/>
+        </scene>
+    </scenes>
+</document>

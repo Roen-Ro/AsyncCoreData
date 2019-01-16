@@ -1,5 +1,5 @@
 //
-//  CoreDataBaseManager+Configration.m
+//  AsyncCoreData+Configration.m
 //  AsyncCoreData
 //
 //  Created by 罗亮富 on 2019/1/15.

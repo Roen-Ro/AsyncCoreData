@@ -1,5 +1,5 @@
 //
-//  CoreDataBaseManager.m
+//  AsyncCoreData.m
 //  ZhuShouCustomize
 //
 //  Created by 罗亮富 on 2019/1/9.
@@ -201,7 +201,7 @@ static NSRecursiveLock *sWriteLock;
         if(DBm) {
             
             T_ModelToManagedObjectBlock blk = [sSettingDBValuesBlockMap objectForKey:entityName];
-            NSAssert(blk, @"model mapper block haven't set for entity %@, Use +[CoreDataBaseManager setModelToDataBaseMapper:forEntity] method to setup",entityName);
+            NSAssert(blk, @"model mapper block haven't set for entity %@, Use +[AsyncCoreData setModelToDataBaseMapper:forEntity] method to setup",entityName);
             blk(m, DBm);
 
             //   [self cacheObject:m forManagedObject:DBm]; //cacke比较复杂 如果是更新操作的话，之前的步骤会保证cacke，如果是插入操作的话，到后面再cacke
@@ -334,7 +334,7 @@ static NSRecursiveLock *sWriteLock;
     NSObject *m = [self cachedModelForDBModel:DBModel forEntity:entityName];
     if(!m) {
         T_ModelFromManagedObjectBlock blk = [sGettingDBValuesBlockMap objectForKey:entityName];
-        NSAssert(blk, @"model mapper block haven't set for entity %@, Use +[CoreDataBaseManager setModelFromDataBaseMapper:forEntity] method to setup",entityName);
+        NSAssert(blk, @"model mapper block haven't set for entity %@, Use +[AsyncCoreData setModelFromDataBaseMapper:forEntity] method to setup",entityName);
         m = blk(nil, DBModel);
         m.storeID = DBModel.objectID;
         [self cacheModel:DBModel forEntity:entityName];

@@ -20,14 +20,14 @@ typedef __kindof NSObject  * _Nonnull  (^T_ModelFromManagedObjectBlock)(__kindof
  设置当前类的persistantStore,使用前，必须调用此方法来设置,子类的设置可以独立于父类，子类和父类设置互不影响,如果子类没有单独设置，则使用父类的persistantStore
  
  举个栗子:
- 假如MyMessageManager 继承自 CoreDataBaseManager
+ 假如MyMessageManager 继承自 AsyncCoreData
  ```objc
- [CoreDataBaseManager setPersistantStore:url1 withModel:@"mymodel1" completion:^{}];
+ [AsyncCoreData setPersistantStore:url1 withModel:@"mymodel1" completion:^{}];
  [MyMessageManager setPersistantStore:url2 withModel:@"mymodel2" completion:^{}];
  ```
- CoreDataBaseManager 对应为 存储在url1的，对应数据模型为mymodel1的数据库
+ AsyncCoreData 对应为 存储在url1的，对应数据模型为mymodel1的数据库
  MyMessageManager 对应为 存储在url2的，对应数据模型为mymodel2的数据库
- 如果不设置MyMessageManager的话，那么MyMessageManager默认使用CoreDataBaseManager的设置
+ 如果不设置MyMessageManager的话，那么MyMessageManager默认使用AsyncCoreData的设置
  */
 +(void)setPersistantStore:(nullable NSURL *)persistantFileUrl
                 withModel:(nonnull NSString *)modelName
@@ -39,14 +39,14 @@ typedef __kindof NSObject  * _Nonnull  (^T_ModelFromManagedObjectBlock)(__kindof
  举个栗子:
  有个LAGProjectInfo的数据模型，它的数据将要写到数据库中保存，辣么它的值一定要和数据表有映射关系才能进行读写操作
  1.写入映射
- [CoreDataBaseManager setModelMapToDataBaseBlock:^(__kindof LAGProjectInfo<UniqueIDProtocol> * _Nonnull model, NSManagedObject * _Nonnull managedObject) {
+ [AsyncCoreData setModelMapToDataBaseBlock:^(__kindof LAGProjectInfo<UniqueIDProtocol> * _Nonnull model, NSManagedObject * _Nonnull managedObject) {
  [managedObject setValue:model.identifier forKey:@"uniqueID"];
  [managedObject setValue:model.author forKey:@"author_"];
  [managedObject setValue:model.title forKey:@"title_"];
  } forEntity:@"DBProject"];
  
  //读取映射
- [CoreDataBaseManager setModelFromDataBase:^__kindof NSObject * _Nonnull(__kindof LAGProjectInfo<UniqueIDProtocol> * _Nullable model, NSManagedObject * _Nonnull managedObject) {
+ [AsyncCoreData setModelFromDataBase:^__kindof NSObject * _Nonnull(__kindof LAGProjectInfo<UniqueIDProtocol> * _Nullable model, NSManagedObject * _Nonnull managedObject) {
  
  if(!model) //注意这里没有对象的话，要负责创建对象
  model = [LAGProjectInfo new];

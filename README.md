@@ -48,13 +48,34 @@
 <font color=Purple>*数据库配置的方法全部定义在`AsyncCoreData+Configration.h`文件中*</font>
 ```objc
 //这个是你数据库文件在本地的存储地址，可以灵活变换
-NSURL *dataStoreUlr = [myDataDirectory URLByAppendingPathComponent:@"myAppDataBase.sqlite"];
+NSURL *dataStoreUlr = [myDataDirectory URLByAppendingPathComponent:@"PrivateDataBase.sqlite"];
 
 //@“RRCDModel”为你在Xcode中创建的数据库模型文件名称，后缀.xcdatamodeld忽略
 [AsyncCoreData setPersistantStore:dataStoreUlr withModel:@"RRCDModel" completion:^{
     NSLog(@"Core Data finished setup store");
 }];
 ```
+有两个牛逼的地方需要注意：
+- `+[AsyncCoreData setPersistantStore: withModel:completion]` 这个类方法的调用时机是不受限制的，可以通过这个方法来切换数据库，例如在户外助手中，每个登录用户都有自己独立的数据库文件，这个时候，在切换了登录用的时候，就需要通过它来切换数据库。
+- `AsyncCoreData`可以子类化，子类和父类可以分别独立设置不同的数据库，例如在户外助手中，有些数据是随App的，比如轨迹、运动这些东西，那么就保存在App共用数据库中，这个时候可以可以创建一个`AppPublicCoreData`的子类，对这个子类单独配置
+
+举个栗子：
+```objc
+//定义一个子类继承自 AsyncCoreData
+@interface AppPublicCoreData : AsyncCoreData
+@end
+```
+
+```objc
+//公共数据库存储地址
+NSURL *url = [publicDataDirectory URLByAppendingPathComponent:@"AppDataBase.sqlite"];
+
+//@“RRCDModel”为你在Xcode中创建的数据库模型文件名称，后缀.xcdatamodeld忽略
+[AppPublicCoreData setPersistantStore:url withModel:@"PublicDataModel" completion:^{
+    NSLog(@"Core Data finished setup store");
+}];
+```
+
 4 **设定数据库读写映射方法**
 ```objc
 //模型数据写入数据库配置方法

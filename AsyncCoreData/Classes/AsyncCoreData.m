@@ -67,10 +67,11 @@ static NSRecursiveLock *sWriteLock;
             
         });
     }
+#if TARGET_OS_IPHONE
     [[NSNotificationCenter defaultCenter]addObserver:self
                                             selector:@selector(clearUnNessesaryCachedData)
                                                 name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
-    
+#endif
 }
 
 

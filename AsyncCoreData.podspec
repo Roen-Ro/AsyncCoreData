@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'AsyncCoreData'
-  s.version          = '1.0.0'
+  s.version          = '1.1.0'
   s.summary          = 'Thread safe And Memory cached models for core data usage'
 
 # This description is used to generate tags and improve search results.
@@ -18,7 +18,8 @@ Pod::Spec.new do |s|
 #   * Finally, don't worry about the indent, CocoaPods strips it!
 
   s.description      = <<-DESC
-TODO: Add long description of the pod here.
+高效、便捷、安全的CoreData数据库管理类，再也没有线程安全的苦恼了
+Thread safe And Memory cached models for core data usage
                        DESC
 
   s.homepage         = 'https://github.com/Roen-Ro/AsyncCoreData'

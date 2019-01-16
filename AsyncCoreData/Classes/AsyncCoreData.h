@@ -173,6 +173,10 @@ modelsWithPredicateAsync:(nullable NSPredicate *)predicate
 //将数据库同步到磁盘 for subclass
 +(nullable NSError *)synchronizeinContext:(nonnull NSManagedObjectContext *)context;
 
+#pragma mark- 清理缓存
+//ios会在收到内存警告到时候自动清理， osx需要程序员自己在适当的实际调用该方法
++(void)clearUnNessesaryCachedData;
+
 @end
 
 

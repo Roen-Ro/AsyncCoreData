@@ -69,3 +69,6 @@ typedef __kindof NSObject  * _Nonnull  (^T_ModelFromManagedObjectBlock)(__kindof
 
 @end
 
+#define BG_USE_SAME_RUNLOOP_  0 //@available(macOS 10.2, iOS 10, *)
+
+

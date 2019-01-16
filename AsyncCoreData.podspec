@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'AsyncCoreData'
-  s.version          = '1.1.2'
+  s.version          = '1.2.0'
   s.summary          = 'Thread safe And Memory cached models for core data usage'
 
 # This description is used to generate tags and improve search results.
@@ -29,8 +29,8 @@ Thread safe And Memory cached models for core data usage
   s.source           = { :git => 'https://github.com/Roen-Ro/AsyncCoreData.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
-  s.ios.deployment_target = '10.0'
-  s.macos.deployment_target = '10.12'
+  s.ios.deployment_target = '8.0'
+  s.macos.deployment_target = '10.0'
   
   s.source_files = 'AsyncCoreData/Classes/**/*'
   

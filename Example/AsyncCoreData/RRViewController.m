@@ -66,15 +66,16 @@
 
     }];
     
+      self.SubFixStr = [self.segControl titleForSegmentAtIndex:self.segControl.selectedSegmentIndex];
 }
 
 -(IBAction)changeToCurrentStore:(id)sender {
     [self dataStoreChange:self.segControl];
 }
 
--(NSString *)SubFixStr {
-    return [self.segControl titleForSegmentAtIndex:self.segControl.selectedSegmentIndex];
-}
+
+
+
 
 -(NSArray *)dataToWrite {
     

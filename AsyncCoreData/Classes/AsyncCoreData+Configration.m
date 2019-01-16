@@ -72,21 +72,30 @@ extern NSRunLoop *sBgNSRunloop;
         }
     };
     
-    //首先创建runloop, 保证所有任务都是在同一个线程执行
-    if(!sBgNSRunloop) {
+    if (BG_USE_SAME_RUNLOOP_)  {
         
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
+        //首先创建runloop, 保证所有任务都是在同一个线程执行
+        if(!sBgNSRunloop) {
             
-            sBgNSRunloop = [NSRunLoop currentRunLoop];
-            [sBgNSRunloop addPort:[NSMachPort port] forMode:NSDefaultRunLoopMode];
-            busniessBlock();
-            CFRunLoopRun();
-        });
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
+                
+                sBgNSRunloop = [NSRunLoop currentRunLoop];
+                [sBgNSRunloop addPort:[NSMachPort port] forMode:NSDefaultRunLoopMode];
+                busniessBlock();
+                CFRunLoopRun();
+            });
+        }
+        else {
+            [sBgNSRunloop performBlock:busniessBlock];
+        }
     }
     else {
-        //CFRunLoopPerformBlock(sBgRunloop, kCFRunLoopDefaultMode, busniessBlock);
-        [sBgNSRunloop performBlock:busniessBlock];
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
+            busniessBlock();
+        });
     }
+    
+
 }
 
 +(nullable NSPersistentStoreCoordinator *)persistentStoreCoordinator {
@@ -126,7 +135,10 @@ extern NSRunLoop *sBgNSRunloop;
     //    }
     //    return _sharedBackgroundContext;
     //因为在使用类方法切换NSPersistentStoreCoordinator后，所有的对象实例要保持同步更新，所以不用实例变量保存
-    return [self inter_classSharedValueFromMap:sBackgroundContextClassMap];
+    if(BG_USE_SAME_RUNLOOP_)
+        return [self inter_classSharedValueFromMap:sBackgroundContextClassMap];
+    else
+        return [self newContext];
 }
 
 +(NSManagedObjectContext *)newContext {

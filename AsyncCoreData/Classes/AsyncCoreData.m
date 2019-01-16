@@ -43,8 +43,12 @@ static NSRecursiveLock *sWriteLock;
 #define _add_write_lock() [sWriteLock tryLock]
 #define _remove_write_lock() [sWriteLock unlock]
 
-#define MAIN_RUN(code...)                 dispatch_async(dispatch_get_main_queue(), ^{code;});
+#define ASYNC_BLOCK(bock) dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),bock)
 
+#define DO_ASYNC_WORK(bock) if (BG_USE_SAME_RUNLOOP_) \
+                                [sBgNSRunloop performBlock:bock]; \
+                            else \
+                                ASYNC_BLOCK(bock);
 
 @implementation AsyncCoreData
 
@@ -178,12 +182,13 @@ static NSRecursiveLock *sWriteLock;
 
 +(void)queryEntity:(NSString *)entityName saveModelsAsync:(NSArray<id<UniqueValueProtocol>> *)datas completion:(void (^)(NSError *))block {
     
-    [sBgNSRunloop performBlock:^{
+    void (^excBlock)(void) = ^{
         NSError *e = [self queryEntity:entityName saveModels:datas inContext:[self sharedBackgroundContext]];
         if(block)
             block(e);
-    }];
+    };
     
+    DO_ASYNC_WORK(excBlock);
 }
 
 +(NSError *)queryEntity:(NSString *)entityName
@@ -244,13 +249,18 @@ static NSRecursiveLock *sWriteLock;
     return [self queryEntity:entityName deleteModels:models inContext:[self newContext]];
 }
 
+
 +(void)queryEntity:(NSString *)entityName deleteModelsAsync:(nonnull NSArray<id<UniqueValueProtocol>> *)models completion:(void (^)(NSError *))block {
-    [sBgNSRunloop performBlock:^{
+
+    void (^excBlock)(void) = ^{
         NSError *e = [self queryEntity:entityName deleteModels:models inContext:[self sharedBackgroundContext]];
         if(block)
             block(e);
-    }];
+    };
+    
+    DO_ASYNC_WORK(excBlock);
 }
+
 
 +(NSError *)queryEntity:(NSString *)entityName deleteModels:(nonnull NSArray<id<UniqueValueProtocol>> *)models inContext:(NSManagedObjectContext *)context {
     
@@ -276,11 +286,12 @@ static NSRecursiveLock *sWriteLock;
 }
 
 +(void)queryEntity:(NSString *)entityName deleteModelsWithUniquevaluesAsync:(nonnull NSArray *)modelUniquevalues completion:(void (^)(NSError *))block {
-    [sBgNSRunloop performBlock:^{
+    void (^excBlock)(void) = ^{
         NSError *e = [self queryEntity:entityName deleteModelsWithUniquevalues:modelUniquevalues inContext:[self sharedBackgroundContext]];
         if(block)
             block(e);
-    }];
+    };
+    DO_ASYNC_WORK(excBlock);
 }
 
 +(NSError *)queryEntity:(NSString *)entityName deleteModelsWithUniquevalues:(nonnull NSArray *)modelUniquevalues inContext:(NSManagedObjectContext *)context {
@@ -306,11 +317,12 @@ static NSRecursiveLock *sWriteLock;
 
 +(void)queryEntity:(NSString *)entityName deleteModelsWithPredicateAsync:(nullable NSPredicate *)predicate
                                 completion:(void (^)(NSError *))block {
-    [sBgNSRunloop performBlock:^{
+    void (^excBlock)(void) = ^{
         NSError *e = [self queryEntity:entityName deleteModelsWithPredicate:predicate inContext:[self sharedBackgroundContext]];
         if(block)
             block(e);
-    }];
+    };
+    DO_ASYNC_WORK(excBlock);
 }
 
 +(NSError *)queryEntity:(NSString *)entityName deleteModelsWithPredicate:(nullable NSPredicate *)predicate inContext:(NSManagedObjectContext *)context {
@@ -408,11 +420,13 @@ static NSRecursiveLock *sWriteLock;
                       sortByKey:(NSString *)sortKey
                         reverse:(BOOL)reverse
                      completion:(void (^)(NSArray *))block {
-    [sBgNSRunloop performBlock:^{
+    
+    void (^excBlock)(void) = ^{
         NSArray *r = [self queryEntity:entityName modelsWithPredicate:predicate inRange:range sortByKey:sortKey reverse:reverse inContext:[self sharedBackgroundContext]];
         if(block)
             block(r);
-    }];
+    };
+    DO_ASYNC_WORK(excBlock);
 }
 
 
@@ -550,11 +564,12 @@ static NSRecursiveLock *sWriteLock;
 }
 
 +(void)queryEntity:(NSString *)entityName numberOfItemsWithPredicateAsync:(nullable NSPredicate *)predicate completion:(void(^)(NSUInteger ))block {
-    [sBgNSRunloop performBlock:^{
+    void (^excBlock)(void) = ^{
         NSUInteger c = [self queryEntity:entityName numberOfItemsWithPredicate:predicate inContext:[self sharedBackgroundContext]];
         if(block)
             block(c);
-    }];
+    };
+    DO_ASYNC_WORK(excBlock);
 }
 
 +(NSUInteger)queryEntity:(NSString *)entityName
@@ -592,11 +607,12 @@ numberOfItemsWithPredicate:(nullable NSPredicate *)predicate
 
 +(void)queryEntity:(NSString *)entityName valueWithFuctionAsync:(NSString *)func forKey:(NSString *)key withPredicate:(NSPredicate *)predicate completion:(void(^)(NSNumber * ))block {
     
-    [sBgNSRunloop performBlock:^{
+    void (^excBlock)(void) = ^{
         NSNumber *n = [self queryEntity:entityName valueWithFuction:func forKey:key withPredicate:predicate inContext:[self sharedBackgroundContext]];
         if(block)
             block(n);
-    }];
+    };
+    DO_ASYNC_WORK(excBlock);
 }
 
 +(NSNumber *)queryEntity:(NSString *)entityName valueWithFuction:(NSString *)func forKey:(NSString *)key withPredicate:(NSPredicate *)predicate inContext:(NSManagedObjectContext *)context
@@ -637,11 +653,12 @@ sumValuesForKeyPathes:(NSArray *)keyPathes
        sortKeyPath:(NSString *)sortKeyPath
            inRange:(NSRange)range
         completion:(void (^)(NSArray<NSDictionary *> *))block {
-    [sBgNSRunloop performBlock:^{
+    void (^excBlock)(void) = ^{
         NSArray *r = [self queryEntity:entityName sumValuesForKeyPathes:keyPathes groupby:groups withPredicate:predicate sortKeyPath:sortKeyPath inRange:range inContext:[self sharedBackgroundContext]];
         if(block)
             block(r);
-    }];
+    };
+    DO_ASYNC_WORK(excBlock);
 }
 
 +(NSArray<NSDictionary *> *)queryEntity:(NSString *)entityName

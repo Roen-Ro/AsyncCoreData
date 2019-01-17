@@ -19,6 +19,8 @@
 		5DAF7132B4AB2A367A87B2C3E50C10AD /* AsyncCoreData.m in Sources */ = {isa = PBXBuildFile; fileRef = 7844D1299DFCC83538B5F4BC0EFDF723 /* AsyncCoreData.m */; };
 		6894C1D590B71BD95324BCAE3F82ECC5 /* Pods-AsyncCoreData_Tests-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 2BBFA07F625307F067757FF8FBD722D6 /* Pods-AsyncCoreData_Tests-dummy.m */; };
 		8C627AF3DC834C208DE7578F574B8E8C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A16F4CFC63FAC439D7A04994F579A03 /* Foundation.framework */; };
+		9FB3C51C21F04C560043AAF7 /* AsyncHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 9FB3C51B21F04C560043AAF7 /* AsyncHelper.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		9FB3C51E21F04C910043AAF7 /* AsyncHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 9FB3C51D21F04C910043AAF7 /* AsyncHelper.m */; };
 		CE8AD1BE7E50103EEE770B0271514B16 /* AsyncCoreData-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 9E8EECD9B963048F1C6307B41A4CC19A /* AsyncCoreData-dummy.m */; };
 		DB74ABB08F93C9348CE28A04D3939059 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A16F4CFC63FAC439D7A04994F579A03 /* Foundation.framework */; };
 /* End PBXBuildFile section */
@@ -67,6 +69,8 @@
 		96DE9A8C230D9E945FDF893E72412C96 /* Pods-AsyncCoreData_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-AsyncCoreData_Example.release.xcconfig"; sourceTree = "<group>"; };
 		9D353092D292C0B63C1ADF22D87F0794 /* Pods_AsyncCoreData_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_AsyncCoreData_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9E8EECD9B963048F1C6307B41A4CC19A /* AsyncCoreData-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "AsyncCoreData-dummy.m"; sourceTree = "<group>"; };
+		9FB3C51B21F04C560043AAF7 /* AsyncHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AsyncHelper.h; path = AsyncCoreData/Classes/AsyncHelper.h; sourceTree = "<group>"; };
+		9FB3C51D21F04C910043AAF7 /* AsyncHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = AsyncHelper.m; path = AsyncCoreData/Classes/AsyncHelper.m; sourceTree = "<group>"; };
 		ABB33D7E8970F64E0DC026CFFEEE0945 /* AsyncCoreData+Configration.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "AsyncCoreData+Configration.h"; path = "AsyncCoreData/Classes/AsyncCoreData+Configration.h"; sourceTree = "<group>"; };
 		AC01FD69E02DFA7903B9D514213588D0 /* Pods-AsyncCoreData_Example-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-AsyncCoreData_Example-acknowledgements.markdown"; sourceTree = "<group>"; };
 		C38F0B3B777D8564AE4476703866352B /* AsyncCoreData-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "AsyncCoreData-prefix.pch"; sourceTree = "<group>"; };
@@ -125,6 +129,8 @@
 				ABB33D7E8970F64E0DC026CFFEEE0945 /* AsyncCoreData+Configration.h */,
 				4255183671431B843C6D94516713A144 /* AsyncCoreData+Configration.m */,
 				F571DE6458D2487C47E29B2B83A44BC3 /* UniqueValueProtocol.h */,
+				9FB3C51B21F04C560043AAF7 /* AsyncHelper.h */,
+				9FB3C51D21F04C910043AAF7 /* AsyncHelper.m */,
 				E9C3193A7706BDCABC7054A9746264DD /* Pod */,
 				3678CB6D5571EBF63766D29C66E41699 /* Support Files */,
 			);
@@ -251,6 +257,7 @@
 				0D5ADADF3CBD97BFD41ED5D231119797 /* AsyncCoreData+Configration.h in Headers */,
 				4F0E688CCF8F273FA64A6651C7D010A2 /* AsyncCoreData-umbrella.h in Headers */,
 				4A46D737E9CB136F00A8AA6B72DABC5B /* AsyncCoreData.h in Headers */,
+				9FB3C51C21F04C560043AAF7 /* AsyncHelper.h in Headers */,
 				0BA2CA464FB77E7D26B52B9AF2B834DA /* UniqueValueProtocol.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -397,6 +404,7 @@
 			files = (
 				1B44E6C3C7AE3705F30C0969634CA677 /* AsyncCoreData+Configration.m in Sources */,
 				CE8AD1BE7E50103EEE770B0271514B16 /* AsyncCoreData-dummy.m in Sources */,
+				9FB3C51E21F04C910043AAF7 /* AsyncHelper.m in Sources */,
 				5DAF7132B4AB2A367A87B2C3E50C10AD /* AsyncCoreData.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

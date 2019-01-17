@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 #import "UniqueValueProtocol.h"
-
+#import "AsyncHelper.h"
 
 #ifndef lazy
 #define lazy readonly
@@ -169,6 +169,7 @@ modelsWithPredicateAsync:(nullable NSPredicate *)predicate
                                                 reverse:(BOOL)reverse
                                               inContext:(nonnull NSManagedObjectContext *)context;
 
++(nullable id)modelForUrl:(nonnull NSURL *)representationUrl;
 
 //将数据库同步到磁盘 for subclass
 +(nullable NSError *)synchronizeinContext:(nonnull NSManagedObjectContext *)context;

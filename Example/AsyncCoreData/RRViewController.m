@@ -29,6 +29,7 @@
  //   self.segControl.selectedSegmentIndex = 1;
     [self dataStoreChange:self.segControl];
     [self initialDataMap];
+
 }
 -(void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
@@ -109,7 +110,13 @@
     m5.level = 1;
     m5.zipCode = [NSString stringWithFormat:@"%@-A001",self.SubFixStr];
     
-    return @[m1,m2,m3,m4,m5];
+    PlaceModel *m6 = [PlaceModel new];
+    m6.name = @"Not Found";
+    m6.country = @"Outter Space";
+    m6.level = 1;
+    m6.zipCode = nil;
+    
+    return @[m1,m2,m3,m4,m5,m6];
 }
 
 - (IBAction)writeData:(id)sender {
@@ -126,21 +133,19 @@
 
 
 - (IBAction)writeDataAsync:(id)sender {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        [DB_PLACE saveModelsAsync:[self dataToWrite] completion:^(NSError *e) {
-            NSLog(@"writeDataAsync finished with error %@",e);
-        }];
-    });
+
+    [DB_PLACE saveModelsAsync:[self dataToWrite] completion:^(NSError *e) {
+        NSLog(@"writeDataAsync finished with error %@",e);
+    }];
 
 }
 - (IBAction)readDataAsync:(id)sender {
     
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        [DB_PLACE modelsWithPredicateAsync:[NSPredicate predicateWithFormat:@"country = \"China\""] inRange:NSMakeRange(0, 999) sortByKey:nil reverse:NO completion:^(NSArray *results) {
-            
-            NSLog(@"readDataAsync:%@",results);
-        }];
-    });
+    [DB_PLACE modelsWithPredicateAsync:[NSPredicate predicateWithFormat:@"country = \"China\""] inRange:NSMakeRange(0, 999) sortByKey:nil reverse:NO completion:^(NSArray *results) {
+        
+        NSLog(@"readDataAsync:%@",results);
+    }];
+
 }
 
 -(IBAction)clearAllData:(id)btn {

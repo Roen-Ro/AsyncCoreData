@@ -27,8 +27,8 @@
 
  NSMutableDictionary *sDataBaseCacheMap;
  NSMapTable *sPersistantStoreMap;
-//static NSMutableDictionary *sMainContextClassMap;
- NSMutableDictionary *sBackgroundContextClassMap;
+ NSMutableDictionary *sPersistantStoreClassMap;
+
 
  NSMutableDictionary *sSettingDBValuesBlockMap;
  NSMutableDictionary *sGettingDBValuesBlockMap;
@@ -43,13 +43,6 @@ static NSRecursiveLock *sWriteLock;
 #define _add_write_lock() [sWriteLock tryLock]
 #define _remove_write_lock() [sWriteLock unlock]
 
-#define ASYNC_BLOCK(bock) dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),bock)
-
-#define DO_ASYNC_WORK(bock) if (BG_USE_SAME_RUNLOOP_) \
-                                [sBgNSRunloop performBlock:bock]; \
-                            else \
-                                ASYNC_BLOCK(bock);
-
 @implementation AsyncCoreData
 
 
@@ -62,7 +55,7 @@ static NSRecursiveLock *sWriteLock;
         dispatch_once(&onceToken, ^{
             sDataBaseCacheMap = [NSMutableDictionary dictionaryWithCapacity:10];
             sPersistantStoreMap = [NSMapTable strongToWeakObjectsMapTable];
-            sBackgroundContextClassMap = [NSMutableDictionary dictionaryWithCapacity:3];
+            sPersistantStoreClassMap = [NSMutableDictionary dictionaryWithCapacity:3];
             sSettingDBValuesBlockMap = [NSMutableDictionary dictionaryWithCapacity:3];
             sGettingDBValuesBlockMap = [NSMutableDictionary dictionaryWithCapacity:3];
             
@@ -155,26 +148,37 @@ static NSRecursiveLock *sWriteLock;
     _remove_cache_lock();
 }
 
+#pragma mark-
+
+
++(void)inter_doBackgroundTask:(void (^)(void))task {
+    
+    if (BG_USE_SAME_RUNLOOP_)
+        [sBgNSRunloop performBlock:task];
+    else
+        background_async(task);
+}
+
 #pragma mark- insert/update
 
 
 
-//-(nullable id)modelForUrl:(nonnull NSURL *)representationUrl
-//{
-//    if(!representationUrl)
-//        return nil;
-//    
-//    NSManagedObjectID *obID = [self.context.persistentStoreCoordinator managedObjectIDForURIRepresentation:representationUrl];
-//    
-//    if(obID)
-//    {
-//        NSError *error;
-//        NSManagedObject *managedObj = [self.context existingObjectWithID:obID error:&error];
-//        return [self modelFromDBModel:managedObj];
-//    }
-//    else
-//        return nil;
-//}
++(nullable id)modelForUrl:(nonnull NSURL *)representationUrl
+{
+    if(!representationUrl)
+        return nil;
+    
+    NSManagedObjectID *obID = [[self persistentStoreCoordinator] managedObjectIDForURIRepresentation:representationUrl];
+    
+    if(obID)
+    {
+        NSError *error;
+        NSManagedObject *managedObj = [[self newContext] existingObjectWithID:obID error:&error];
+        return [self queryEntity:managedObj.entity.name modelFromDBModel:managedObj];
+    }
+    else
+        return nil;
+}
 
 +(NSError *)queryEntity:(NSString *)entityName saveModels:(nonnull NSArray<id<UniqueValueProtocol>> *)datas {
     return [self queryEntity:entityName saveModels:datas inContext:[self newContext]];
@@ -182,13 +186,15 @@ static NSRecursiveLock *sWriteLock;
 
 +(void)queryEntity:(NSString *)entityName saveModelsAsync:(NSArray<id<UniqueValueProtocol>> *)datas completion:(void (^)(NSError *))block {
     
-    void (^excBlock)(void) = ^{
-        NSError *e = [self queryEntity:entityName saveModels:datas inContext:[self sharedBackgroundContext]];
-        if(block)
-            block(e);
-    };
+   [self inter_doBackgroundTask:^{
+       
+        NSError *e = [self queryEntity:entityName saveModels:datas inContext:[self newContext]];
+        main_task(^{
+            if(block)
+                block(e);
+        });
+    }];
     
-    DO_ASYNC_WORK(excBlock);
 }
 
 +(NSError *)queryEntity:(NSString *)entityName
@@ -206,7 +212,7 @@ static NSRecursiveLock *sWriteLock;
         if(DBm) {
             
             T_ModelToManagedObjectBlock blk = [sSettingDBValuesBlockMap objectForKey:entityName];
-            NSAssert(blk, @"model mapper block haven't set for entity %@, Use +[AsyncCoreData setModelToDataBaseMapper:forEntity] method to setup",entityName);
+            NSAssert(blk, @"model mapper block haven't set for entity %@, Use +[AsyncCoreData setModelToDataBaseMapper:forEntity:] method to setup",entityName);
             blk(m, DBm);
 
             //   [self cacheObject:m forManagedObject:DBm]; //cacke比较复杂 如果是更新操作的话，之前的步骤会保证cacke，如果是插入操作的话，到后面再cacke
@@ -252,13 +258,13 @@ static NSRecursiveLock *sWriteLock;
 
 +(void)queryEntity:(NSString *)entityName deleteModelsAsync:(nonnull NSArray<id<UniqueValueProtocol>> *)models completion:(void (^)(NSError *))block {
 
-    void (^excBlock)(void) = ^{
-        NSError *e = [self queryEntity:entityName deleteModels:models inContext:[self sharedBackgroundContext]];
-        if(block)
-            block(e);
-    };
-    
-    DO_ASYNC_WORK(excBlock);
+    [self inter_doBackgroundTask:^{
+        NSError *e = [self queryEntity:entityName deleteModels:models inContext:[self newContext]];
+        main_task(^{
+            if(block)
+                block(e);
+        });
+    }];
 }
 
 
@@ -286,12 +292,13 @@ static NSRecursiveLock *sWriteLock;
 }
 
 +(void)queryEntity:(NSString *)entityName deleteModelsWithUniquevaluesAsync:(nonnull NSArray *)modelUniquevalues completion:(void (^)(NSError *))block {
-    void (^excBlock)(void) = ^{
-        NSError *e = [self queryEntity:entityName deleteModelsWithUniquevalues:modelUniquevalues inContext:[self sharedBackgroundContext]];
-        if(block)
-            block(e);
-    };
-    DO_ASYNC_WORK(excBlock);
+    [self inter_doBackgroundTask:^{
+        NSError *e = [self queryEntity:entityName deleteModelsWithUniquevalues:modelUniquevalues inContext:[self newContext]];
+        main_task(^{
+            if(block)
+                block(e);
+        });
+    }];
 }
 
 +(NSError *)queryEntity:(NSString *)entityName deleteModelsWithUniquevalues:(nonnull NSArray *)modelUniquevalues inContext:(NSManagedObjectContext *)context {
@@ -317,12 +324,14 @@ static NSRecursiveLock *sWriteLock;
 
 +(void)queryEntity:(NSString *)entityName deleteModelsWithPredicateAsync:(nullable NSPredicate *)predicate
                                 completion:(void (^)(NSError *))block {
-    void (^excBlock)(void) = ^{
-        NSError *e = [self queryEntity:entityName deleteModelsWithPredicate:predicate inContext:[self sharedBackgroundContext]];
-        if(block)
-            block(e);
-    };
-    DO_ASYNC_WORK(excBlock);
+    [self inter_doBackgroundTask:^{
+        NSError *e = [self queryEntity:entityName deleteModelsWithPredicate:predicate inContext:[self newContext]];
+        
+        main_task(^{
+            if(block)
+                block(e);
+        });
+    }];
 }
 
 +(NSError *)queryEntity:(NSString *)entityName deleteModelsWithPredicate:(nullable NSPredicate *)predicate inContext:(NSManagedObjectContext *)context {
@@ -421,12 +430,14 @@ static NSRecursiveLock *sWriteLock;
                         reverse:(BOOL)reverse
                      completion:(void (^)(NSArray *))block {
     
-    void (^excBlock)(void) = ^{
-        NSArray *r = [self queryEntity:entityName modelsWithPredicate:predicate inRange:range sortByKey:sortKey reverse:reverse inContext:[self sharedBackgroundContext]];
-        if(block)
-            block(r);
-    };
-    DO_ASYNC_WORK(excBlock);
+    [self inter_doBackgroundTask: ^{
+        NSArray *r = [self queryEntity:entityName modelsWithPredicate:predicate inRange:range sortByKey:sortKey reverse:reverse inContext:[self newContext]];
+        
+        main_task(^{
+            if(block)
+                block(r);
+        });
+    }];
 }
 
 
@@ -564,12 +575,14 @@ static NSRecursiveLock *sWriteLock;
 }
 
 +(void)queryEntity:(NSString *)entityName numberOfItemsWithPredicateAsync:(nullable NSPredicate *)predicate completion:(void(^)(NSUInteger ))block {
-    void (^excBlock)(void) = ^{
-        NSUInteger c = [self queryEntity:entityName numberOfItemsWithPredicate:predicate inContext:[self sharedBackgroundContext]];
-        if(block)
-            block(c);
-    };
-    DO_ASYNC_WORK(excBlock);
+    [self inter_doBackgroundTask:^{
+        NSUInteger c = [self queryEntity:entityName numberOfItemsWithPredicate:predicate inContext:[self newContext]];
+        
+        main_task(^{
+            if(block)
+                block(c);
+        });
+    }];
 }
 
 +(NSUInteger)queryEntity:(NSString *)entityName
@@ -607,12 +620,13 @@ numberOfItemsWithPredicate:(nullable NSPredicate *)predicate
 
 +(void)queryEntity:(NSString *)entityName valueWithFuctionAsync:(NSString *)func forKey:(NSString *)key withPredicate:(NSPredicate *)predicate completion:(void(^)(NSNumber * ))block {
     
-    void (^excBlock)(void) = ^{
-        NSNumber *n = [self queryEntity:entityName valueWithFuction:func forKey:key withPredicate:predicate inContext:[self sharedBackgroundContext]];
-        if(block)
-            block(n);
-    };
-    DO_ASYNC_WORK(excBlock);
+    [self inter_doBackgroundTask: ^{
+        NSNumber *n = [self queryEntity:entityName valueWithFuction:func forKey:key withPredicate:predicate inContext:[self newContext]];
+        main_task(^{
+            if(block)
+                block(n);
+        });
+    }];
 }
 
 +(NSNumber *)queryEntity:(NSString *)entityName valueWithFuction:(NSString *)func forKey:(NSString *)key withPredicate:(NSPredicate *)predicate inContext:(NSManagedObjectContext *)context
@@ -653,12 +667,13 @@ sumValuesForKeyPathes:(NSArray *)keyPathes
        sortKeyPath:(NSString *)sortKeyPath
            inRange:(NSRange)range
         completion:(void (^)(NSArray<NSDictionary *> *))block {
-    void (^excBlock)(void) = ^{
-        NSArray *r = [self queryEntity:entityName sumValuesForKeyPathes:keyPathes groupby:groups withPredicate:predicate sortKeyPath:sortKeyPath inRange:range inContext:[self sharedBackgroundContext]];
-        if(block)
-            block(r);
-    };
-    DO_ASYNC_WORK(excBlock);
+    [self inter_doBackgroundTask:^{
+        NSArray *r = [self queryEntity:entityName sumValuesForKeyPathes:keyPathes groupby:groups withPredicate:predicate sortKeyPath:sortKeyPath inRange:range inContext:[self newContext]];
+        main_task(^{
+            if(block)
+                block(r);
+        });
+    }];
 }
 
 +(NSArray<NSDictionary *> *)queryEntity:(NSString *)entityName

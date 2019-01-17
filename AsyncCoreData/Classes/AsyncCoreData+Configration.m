@@ -9,8 +9,7 @@
 
 extern NSMutableDictionary *sDataBaseCacheMap;
 extern NSMapTable *sPersistantStoreMap;
-//static NSMutableDictionary *sMainContextClassMap;
-extern NSMutableDictionary *sBackgroundContextClassMap;
+extern NSMutableDictionary *sPersistantStoreClassMap;
 
 extern NSMutableDictionary *sSettingDBValuesBlockMap;
 extern NSMutableDictionary *sGettingDBValuesBlockMap;
@@ -52,56 +51,23 @@ extern NSRunLoop *sBgNSRunloop;
         }
         
         NSString *classIndependentKey = NSStringFromClass([self class]);
-        NSManagedObjectContext *bgContext = [sBackgroundContextClassMap objectForKey:classIndependentKey];
+        NSPersistentStoreCoordinator *psc = [sPersistantStoreClassMap objectForKey:classIndependentKey];
         
-        if(!bgContext || bgContext.persistentStoreCoordinator != persistantStoreCord) {
-            
-            bgContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
-            
-            @synchronized(sBackgroundContextClassMap) {
-                [sBackgroundContextClassMap setObject:bgContext forKey:classIndependentKey];
+        if(!psc || psc != persistantStoreCord) {
+            @synchronized(sPersistantStoreClassMap) {
+                [sPersistantStoreClassMap setObject:persistantStoreCord forKey:classIndependentKey];
             }
-            [bgContext setPersistentStoreCoordinator:persistantStoreCord];
         }
         
-        if(mainThreadBlock) {
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                mainThreadBlock();
-            });
-        }
+        main_task(mainThreadBlock);
     };
     
-    if (BG_USE_SAME_RUNLOOP_)  {
-        
-        //首先创建runloop, 保证所有任务都是在同一个线程执行
-        if(!sBgNSRunloop) {
-            
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
-                
-                sBgNSRunloop = [NSRunLoop currentRunLoop];
-                [sBgNSRunloop addPort:[NSMachPort port] forMode:NSDefaultRunLoopMode];
-                busniessBlock();
-                CFRunLoopRun();
-            });
-        }
-        else {
-            [sBgNSRunloop performBlock:busniessBlock];
-        }
-    }
-    else {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
-            busniessBlock();
-        });
-    }
-    
-
+    background_async(busniessBlock);
 }
 
 +(nullable NSPersistentStoreCoordinator *)persistentStoreCoordinator {
     NSString *key = NSStringFromClass([self class]);
-    NSManagedObjectContext *ctx = [sBackgroundContextClassMap objectForKey:key];
-    return ctx.persistentStoreCoordinator;
+    return  [sPersistantStoreClassMap objectForKey:key];
 }
 
 +(void)setModelToDataBaseMapper:(nonnull T_ModelToManagedObjectBlock)mapper forEntity:(nonnull NSString *)entityName {
@@ -128,24 +94,12 @@ extern NSRunLoop *sBgNSRunloop;
 }
 
 
-+(NSManagedObjectContext *)sharedBackgroundContext {
-    //    if(!_sharedBackgroundContext)
-    //    {
-    //        _sharedBackgroundContext = [self inter_classSharedValueFromMap:sBackgroundContextClassMap];
-    //    }
-    //    return _sharedBackgroundContext;
-    //因为在使用类方法切换NSPersistentStoreCoordinator后，所有的对象实例要保持同步更新，所以不用实例变量保存
-    if(BG_USE_SAME_RUNLOOP_)
-        return [self inter_classSharedValueFromMap:sBackgroundContextClassMap];
-    else
-        return [self newContext];
-}
-
 +(NSManagedObjectContext *)newContext {
     NSManagedObjectContext *context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
     [context setPersistentStoreCoordinator:[self  persistentStoreCoordinator]];
     return context;
 }
+
 
 
 @end

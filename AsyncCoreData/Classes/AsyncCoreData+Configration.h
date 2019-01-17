@@ -64,10 +64,10 @@ typedef __kindof NSObject  * _Nonnull  (^T_ModelFromManagedObjectBlock)(__kindof
 
 +(nullable NSPersistentStoreCoordinator *)persistentStoreCoordinator;
 
-+(NSManagedObjectContext *)sharedBackgroundContext;
 +(NSManagedObjectContext *)newContext; //在当前线程创建一个新的context
 
 @end
+
 
 #define BG_USE_SAME_RUNLOOP_  0 //@available(macOS 10.2, iOS 10, *)
 

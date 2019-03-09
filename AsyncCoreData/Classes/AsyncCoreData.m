@@ -9,11 +9,9 @@
 #import "AsyncCoreData.h"
 #import <objc/runtime.h>
 
-@interface NSObject (CoreDataModel)
-@property (nonatomic, strong) NSManagedObjectID *storeID;
-@end
 
-@implementation NSObject (CoreDataModel)
+
+@implementation NSObject (AsyncCoreData)
 
 -(void)setStoreID:(NSManagedObjectID *)storeID {
     objc_setAssociatedObject(self, @selector(storeID), storeID, OBJC_ASSOCIATION_RETAIN);
@@ -21,6 +19,10 @@
 
 -(NSManagedObjectID *)storeID {
     return objc_getAssociatedObject(self, @selector(storeID));
+}
+
+-(nullable NSURL *)StoreUrl {
+    return self.storeID.URIRepresentation;
 }
 
 @end
@@ -163,26 +165,40 @@ static NSRecursiveLock *sWriteLock;
 
 
 
-+(nullable id)modelForUrl:(nonnull NSURL *)representationUrl
++(nullable id)modelForStoreUrl:(nonnull NSURL *)storeUrl
 {
-    if(!representationUrl)
+    if(!storeUrl)
         return nil;
     
-    NSManagedObjectID *obID = [[self persistentStoreCoordinator] managedObjectIDForURIRepresentation:representationUrl];
+    NSManagedObjectID *obID = [[self persistentStoreCoordinator] managedObjectIDForURIRepresentation:storeUrl];
     
-    if(obID)
-    {
-        NSError *error;
-        NSManagedObject *managedObj = [[self newContext] existingObjectWithID:obID error:&error];
+    return [self modelForStoreID:obID];
+}
+
++(nullable id)modelForStoreID:(nonnull NSManagedObjectID *)storeID {
+    
+    NSManagedObject *managedObj = [self DBModelForStoreID:storeID];
+    if(managedObj)
         return [self queryEntity:managedObj.entity.name modelFromDBModel:managedObj];
-    }
-    else
+
+    return nil;
+}
+
++(nullable NSManagedObject *)DBModelForStoreID:(nonnull NSManagedObjectID *)storeID {
+    
+    if(!storeID)
         return nil;
+    
+    NSError *error;
+    NSManagedObject *managedObj = [[self newContext] existingObjectWithID:storeID error:&error];
+    
+    return managedObj;
 }
 
 +(NSError *)queryEntity:(NSString *)entityName saveModels:(nonnull NSArray<id<UniqueValueProtocol>> *)datas {
     return [self queryEntity:entityName saveModels:datas inContext:[self newContext]];
 }
+
 
 +(void)queryEntity:(NSString *)entityName saveModelsAsync:(NSArray<id<UniqueValueProtocol>> *)datas completion:(void (^)(NSError *))block {
     

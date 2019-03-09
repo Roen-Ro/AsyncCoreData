@@ -149,6 +149,9 @@ modelsWithPredicateAsync:(nullable NSPredicate *)predicate
                completion:(void (^)(NSArray<NSDictionary *> *))block;
 
 
++(nullable id)modelForStoreUrl:(nonnull NSURL *)storeUrl;
++(nullable id)modelForStoreID:(nonnull NSManagedObjectID *)storeID;
+
 #pragma mark- for subclasses
 +(nullable NSManagedObject *)queryEntity:(NSString *)entityName
                  existingDBModelForModel:(__kindof NSObject<UniqueValueProtocol> *)model
@@ -169,16 +172,22 @@ modelsWithPredicateAsync:(nullable NSPredicate *)predicate
                                                 reverse:(BOOL)reverse
                                               inContext:(nonnull NSManagedObjectContext *)context;
 
-+(nullable id)modelForUrl:(nonnull NSURL *)representationUrl;
+
++(nullable NSManagedObject *)DBModelForStoreID:(nonnull NSManagedObjectID *)storeID;
 
 //将数据库同步到磁盘 for subclass
 +(nullable NSError *)synchronizeinContext:(nonnull NSManagedObjectContext *)context;
 
 #pragma mark- 清理缓存
-//ios会在收到内存警告到时候自动清理， osx需要程序员自己在适当的实际调用该方法
+//ios会在收到内存警告到时候自动清理， osx需要程序员自己在适当的时机调用该方法
 +(void)clearUnNessesaryCachedData;
 
 @end
 
 
 #import "AsyncCoreData+Configration.h"
+
+@interface NSObject (AsyncCoreData)
+@property (nonatomic, nullable, readonly) NSManagedObjectID *storeID;
+@property (nonatomic, nullable, readonly) NSURL *StoreUrl;
+@end

@@ -69,6 +69,7 @@ typedef __kindof NSObject  * _Nonnull  (^T_ModelFromManagedObjectBlock)(__kindof
 @end
 
 
+//只是实验性尝试，打开的话会造成所有操作都集中在一个线程，造成任务拥堵，不能很好地利用多线程资源。
 #define BG_USE_SAME_RUNLOOP_  0 //@available(macOS 10.2, iOS 10, *)
 
 

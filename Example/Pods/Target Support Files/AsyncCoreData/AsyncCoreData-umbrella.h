@@ -12,6 +12,7 @@
 
 #import "AsyncCoreData+Configration.h"
 #import "AsyncCoreData.h"
+#import "AsyncHelper.h"
 #import "UniqueValueProtocol.h"
 
 FOUNDATION_EXPORT double AsyncCoreDataVersionNumber;

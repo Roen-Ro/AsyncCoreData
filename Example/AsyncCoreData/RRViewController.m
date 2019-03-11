@@ -147,6 +147,11 @@
     }];
 
 }
+- (IBAction)readDataCustom:(UIButton *)sender {
+    
+    NSArray *list = [DB_PLACE keyPathes:@[@"name", @"country"] groupby:@[@"name", @"country"] withPredicate:nil sortKeyPath:@"country" inRange:NSMakeRange(0, NSUIntegerMax) reverse:false];
+    NSLog(@"readDataCustom: %@", list);
+}
 
 -(IBAction)clearAllData:(id)btn {
     

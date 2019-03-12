@@ -415,6 +415,26 @@ static NSRecursiveLock *sWriteLock;
     return retObj;
 }
 
++(NSArray<NSDictionary *> *)queryEntity:(nonnull NSString *)entityName
+                              keyPathes:(NSArray *)keyPathes
+                                groupby:(NSArray *)groups
+                          withPredicate:(NSPredicate *)predicate
+                            sortKeyPath:(NSString *)sortKeyPath
+                                inRange:(NSRange)range
+                                reverse:(BOOL)reverse {
+    
+    NSFetchRequest *fetchRequest = [NSFetchRequest fetchRequestWithEntityName:entityName];
+    fetchRequest.predicate = predicate;
+    [self set_UpFetch:fetchRequest forProperties:keyPathes sortByKeyPath:sortKeyPath reverse:reverse];
+    [fetchRequest setPropertiesToGroupBy:groups];
+    fetchRequest.fetchOffset = range.location;
+    fetchRequest.fetchLimit = range.length;
+    
+    NSError *error;
+    NSArray *results = [[self newContext] executeFetchRequest:fetchRequest error:&error];
+    return results;
+}
+
 #pragma mark-
 +(NSManagedObject *)inter_filtOutOnlyEntityInResultList:(NSArray *)resultList inContext:(NSManagedObjectContext *)context
 {

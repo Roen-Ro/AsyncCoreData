@@ -106,6 +106,25 @@ modelsWithPredicateAsync:(nullable NSPredicate *)predicate
         completion:(void (^)(NSArray *))block;
 
 
+/**
+ 查询指定表内指定列数据，根据分组及其它限制返回数据，返回数据格式字典数组
+ 例：@[@{@"name": xxx, @"country": xxx}, ...]
+ @param entityName 表名
+ @param keyPathes 指定列名称, 可参考NSFetchRequest.h内propertiesToFetch属性
+ @param groups 指定分组, 可参考NSFetchRequest.h内propertiesToGroupBy属性
+ @param predicate 谓词限制
+ @param sortKeyPath 排序的字段，注意这个字段是数据库表的字段，而非数据模型的字段
+ @param range 读取数据范围（就像是分页一样）
+ @param reverse 是否按照插入顺序反序输出， YES先插入的在后面，NO后插入的在前面
+ @return NSArray<NSDictionary *> *
+ */
++(NSArray<NSDictionary *> *)queryEntity:(nonnull NSString *)entityName
+                              keyPathes:(NSArray *)keyPathes
+                                groupby:(NSArray *)groups
+                          withPredicate:(NSPredicate *)predicate
+                            sortKeyPath:(NSString *)sortKeyPath
+                                inRange:(NSRange)range
+                                reverse:(BOOL)reverse;
 
 #pragma mark- statitic/count
 

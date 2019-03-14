@@ -177,22 +177,25 @@ static NSRecursiveLock *sWriteLock;
 
 +(nullable id)modelForStoreID:(nonnull NSManagedObjectID *)storeID {
     
-    NSManagedObject *managedObj = [self DBModelForStoreID:storeID];
+    NSDictionary *dic = [self DBModelForStoreID:storeID];
+    NSManagedObjectContext *context = [dic valueForKey:@"context"];
+    NSManagedObject *managedObj = [dic valueForKey:@"object"];
     if(managedObj)
-        return [self queryEntity:managedObj.entity.name modelFromDBModel:managedObj];
+        return [self queryEntity:managedObj.entity.name modelFromDBModel:managedObj context:context];
 
     return nil;
 }
 
-+(nullable NSManagedObject *)DBModelForStoreID:(nonnull NSManagedObjectID *)storeID {
++(nullable NSDictionary *)DBModelForStoreID:(nonnull NSManagedObjectID *)storeID {
     
     if(!storeID)
         return nil;
     
     NSError *error;
-    NSManagedObject *managedObj = [[self newContext] existingObjectWithID:storeID error:&error];
+    NSManagedObjectContext *context = [self newContext];
+    NSManagedObject *managedObj = [context existingObjectWithID:storeID error:&error];
     
-    return managedObj;
+    return @{@"object": managedObj, @"context": context};
 }
 
 +(NSError *)queryEntity:(NSString *)entityName saveModels:(nonnull NSArray<id<UniqueValueProtocol>> *)datas {
@@ -366,7 +369,7 @@ static NSRecursiveLock *sWriteLock;
 
 #pragma mark- find out
 
-+(__kindof NSObject *)queryEntity:(NSString *)entityName modelFromDBModel:(NSManagedObject *)DBModel
++(__kindof NSObject *)queryEntity:(NSString *)entityName modelFromDBModel:(NSManagedObject *)DBModel context:(NSManagedObjectContext *)context
 {
     NSObject *m = [self cachedModelForDBModel:DBModel forEntity:entityName];
     if(!m) {
@@ -489,7 +492,7 @@ static NSRecursiveLock *sWriteLock;
     NSMutableArray *datas = [NSMutableArray arrayWithCapacity:dbDatas.count];
     for(NSManagedObject *dbm in dbDatas) {
         
-        NSObject *m = [self queryEntity:entityName modelFromDBModel:dbm];
+        NSObject *m = [self queryEntity:entityName modelFromDBModel:dbm context:context];
         [datas addObject:m];
     }
     

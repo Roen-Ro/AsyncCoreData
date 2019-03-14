@@ -38,19 +38,19 @@
 
 -(void)initialDataMap {
     [AsyncCoreData setModelToDataBaseMapper:^(PlaceModel * model, NSManagedObject * _Nonnull managedObject) {
-        [managedObject setValue:model.zipCode forKey:@"uniqueID"];
-        [managedObject setValue:model.name forKey:@"name"];
-        [managedObject setValue:model.country forKey:@"country"];
-        [managedObject setValue:@(model.level) forKey:@"level"];
+        setObjForManagedObjecForKey(managedObject, @"uniqueID", model.zipCode);
+        setObjForManagedObjecForKey(managedObject, @"name", model.name);
+        setObjForManagedObjecForKey(managedObject, @"country", model.country);
+        setObjForManagedObjecForKey(managedObject, @"level", @(model.level));
     } forEntity:PLACE_ENTITY];
     
     [AsyncCoreData setModelFromDataBaseMapper:^__kindof NSObject * _Nonnull(PlaceModel * _Nullable model, NSManagedObject * _Nonnull managedObject) {
         if(!model)
             model = [PlaceModel new];
-        model.zipCode = [managedObject valueForKey:@"uniqueID"];
-        model.name = [managedObject valueForKey:@"name"];
-        model.country = [managedObject valueForKey:@"country"];
-        model.level = [[managedObject valueForKey:@"level"] intValue];
+        model.zipCode = getObjFormManagedObjecForKey(managedObject, @"uniqueID");
+        model.name = getObjFormManagedObjecForKey(managedObject, @"name");
+        model.country = getObjFormManagedObjecForKey(managedObject, @"country");
+        model.level = [getObjFormManagedObjecForKey(managedObject, @"level") intValue];
         
         return model;
     } forEntity:PLACE_ENTITY];

@@ -191,8 +191,16 @@ modelsWithPredicateAsync:(nullable NSPredicate *)predicate
                                                 reverse:(BOOL)reverse
                                               inContext:(nonnull NSManagedObjectContext *)context;
 
-
-+(nullable NSManagedObject *)DBModelForStoreID:(nonnull NSManagedObjectID *)storeID;
+/**
+ 根据NSManagedObjectID返回数据，结构为：
+ @{@"object": NSManagedObjectContext *,@"context": NSManagedObject};
+ 
+ @note: 根据id去查询获取的NSManagedObject对象若已经在context注册则是个真正模型对象；若未注册则返回的是fault对象，fault对象对context没有强引用的关系，但context对NSManagedObject对象存在强引用管理的关系;当从NSManagedObject对象获取具体的属性时才会被context进行初始化，因此：context和NSManagedObject一起返回，否则单单返回NSManagedObject对象，而context销毁的话，会是not fulfill a fault。
+ 
+ @param storeID NSManagedObjectID *
+ @return NSDictionary *
+ */
++(nullable NSDictionary *)DBModelForStoreID:(nonnull NSManagedObjectID *)storeID;
 
 //将数据库同步到磁盘 for subclass
 +(nullable NSError *)synchronizeinContext:(nonnull NSManagedObjectContext *)context;
@@ -210,3 +218,25 @@ modelsWithPredicateAsync:(nullable NSPredicate *)predicate
 @property (nonatomic, nullable, readonly) NSManagedObjectID *storeID;
 @property (nonatomic, nullable, readonly) NSURL *StoreUrl;
 @end
+
+/*
+ 做映射关系时建议如下方法原因：在NSManagedObject子类实现动态set/get方法时，实现如下。
+ 参考：https://developer.apple.com/documentation/coredata/nsmanagedobject/1506865-didaccessvalue
+ */
+
+// 实体模型和表字段映射关系，取值时用此方法
+static inline id getObjFormManagedObjecForKey(NSManagedObject *obj ,NSString *key) {
+    
+    [obj willAccessValueForKey:key];
+    id result = [obj valueForKey:key];
+    [obj didAccessValueForKey:key];
+    return result;
+}
+
+// 实体模型和表字段映射关系，赋值时用此方法
+static inline void setObjForManagedObjecForKey(NSManagedObject *obj ,NSString *key, id value) {
+    
+    [obj willChangeValueForKey:key];
+    [obj setValue:value forKey:key];
+    [obj didChangeValueForKey:key];
+}

@@ -192,7 +192,8 @@ modelsWithPredicateAsync:(nullable NSPredicate *)predicate
                                               inContext:(nonnull NSManagedObjectContext *)context;
 
 
-+(nullable NSManagedObject *)DBModelForStoreID:(nonnull NSManagedObjectID *)storeID;
+//因为NSManagedObject是跟特定NSManagedObjectContext相关的，当在操作NSManagedObject的时候要保证它对应的context还存在，所以这个方法的调用者有责任对context的生命周期进行维护
++(nullable NSManagedObject *)DBModelForStoreID:(nonnull NSManagedObjectID *)storeID inContext:(nonnull NSManagedObjectContext *)context;
 
 //将数据库同步到磁盘 for subclass
 +(nullable NSError *)synchronizeinContext:(nonnull NSManagedObjectContext *)context;

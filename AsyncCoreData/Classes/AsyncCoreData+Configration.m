@@ -70,6 +70,12 @@ extern NSRunLoop *sBgNSRunloop;
     return  [sPersistantStoreClassMap objectForKey:key];
 }
 
++(void)invalidatePersistantSotre {
+    NSString *key = NSStringFromClass([self class]);
+    [sPersistantStoreClassMap removeObjectForKey:key];
+}
+
+
 +(void)setModelToDataBaseMapper:(nonnull T_ModelToManagedObjectBlock)mapper forEntity:(nonnull NSString *)entityName {
     [sSettingDBValuesBlockMap setObject:mapper forKey:entityName];
 }

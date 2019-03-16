@@ -63,6 +63,7 @@ typedef __kindof NSObject  * _Nonnull  (^T_ModelFromManagedObjectBlock)(__kindof
 +(void)setModelFromDataBaseMapper:(nonnull T_ModelFromManagedObjectBlock)mapper forEntity:(nonnull NSString *)entityName; //非线程安全
 
 +(nullable NSPersistentStoreCoordinator *)persistentStoreCoordinator;
++(void)invalidatePersistantSotre;//一般不会用到，测试的时候用
 
 +(NSManagedObjectContext *)newContext; //在当前线程创建一个新的context
 

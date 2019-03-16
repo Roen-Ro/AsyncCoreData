@@ -177,20 +177,23 @@ static NSRecursiveLock *sWriteLock;
 
 +(nullable id)modelForStoreID:(nonnull NSManagedObjectID *)storeID {
     
-    NSManagedObject *managedObj = [self DBModelForStoreID:storeID];
+    NSManagedObjectContext *context = [self newContext];
+    NSManagedObject *managedObj = [self DBModelForStoreID:storeID inContext:context];
+    id retObj = nil;
     if(managedObj)
-        return [self queryEntity:managedObj.entity.name modelFromDBModel:managedObj];
+        retObj =  [self queryEntity:managedObj.entity.name modelFromDBModel:managedObj];
 
-    return nil;
+    return retObj;
 }
 
-+(nullable NSManagedObject *)DBModelForStoreID:(nonnull NSManagedObjectID *)storeID {
+//因为NSManagedObject是跟特定NSManagedObjectContext相关的，当在操作NSManagedObject的时候要保证它对应的context还存在，所以这个方法的调用者有责任对context的生命周期进行维护
++(nullable NSManagedObject *)DBModelForStoreID:(nonnull NSManagedObjectID *)storeID inContext:(nonnull NSManagedObjectContext *)context {
     
     if(!storeID)
         return nil;
     
     NSError *error;
-    NSManagedObject *managedObj = [[self newContext] existingObjectWithID:storeID error:&error];
+    NSManagedObject *managedObj = [context existingObjectWithID:storeID error:&error];
     
     return managedObj;
 }
@@ -370,8 +373,12 @@ static NSRecursiveLock *sWriteLock;
 {
     NSObject *m = [self cachedModelForDBModel:DBModel forEntity:entityName];
     if(!m) {
+        
         T_ModelFromManagedObjectBlock blk = [sGettingDBValuesBlockMap objectForKey:entityName];
         NSAssert(blk, @"model mapper block haven't set for entity %@, Use +[AsyncCoreData setModelFromDataBaseMapper:forEntity] method to setup",entityName);
+//      因为managedObjectContext是assign属性，所以如果被释放掉了的话访问的时候就会出现野指针错误，所以这句断言并不能输出预期的信息
+//       NSAssert(DBModel.managedObjectContext, @"the NSManagedObject.managedObjectContext value is nil, which will cause fault value");
+        //在执行block前要保证NSManagedObject.managedObjectContext依然存在，否则会引发fault data
         m = blk(nil, DBModel);
         m.storeID = DBModel.objectID;
         [self cacheModel:DBModel forEntity:entityName];
@@ -574,7 +581,14 @@ static NSRecursiveLock *sWriteLock;
     frqs.fetchOffset = range.location;
     frqs.fetchLimit = range.length;
     
-    NSArray *results = [context executeFetchRequest:frqs error:nil];
+    NSArray *results = nil;
+    @try {
+        results = [context executeFetchRequest:frqs error:nil];
+    } @catch (NSException *exception) {
+        NSLog(@"Exception:%@",exception);
+    } @finally {
+        
+    }
     
     if(!sortKey && reverse)
     {

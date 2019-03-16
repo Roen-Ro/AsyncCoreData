@@ -153,14 +153,75 @@
     NSLog(@"readDataCustom: %@", list);
 }
 
+- (IBAction)multiThreadTest:(id)sender {
+    
+    PlaceModel *m1 = [PlaceModel new];
+    m1.name = @"柏林";
+    m1.country = @"XXOO";
+    m1.level = 1;
+    m1.zipCode = [NSString stringWithFormat:@"%d",rand()%10];
+    
+    
+    PlaceModel *m2 = [PlaceModel new];
+    m2.name = @"印度";
+    m2.country = @"XXOO";
+    m2.level = 1;
+    m2.zipCode = [NSString stringWithFormat:@"%d",rand()%10];;
+    
+    [DB_PLACE saveModelsAsync:@[m1,m2] completion:^(NSError *e) {
+        
+        NSPredicate *p = [NSPredicate predicateWithFormat:@"country = \"XXOO\""];//[NSPredicate predicateWithFormat:@"country = \"WuGN\""];
+        
+        for(int i=0; i<100; i++) {
+            
+            NSArray *results =  [DB_PLACE modelsWithPredicate:p inRange:NSMakeRange(0, 999) sortByKey:nil reverse:YES];
+            //   NSLog(@"readData:%@",results);
+            
+            background_async(^{
+                for(PlaceModel *pm in results) {
+                    PlaceModel *p1 =  [AsyncCoreData modelForStoreUrl:pm.StoreUrl];
+                    PlaceModel *p2 =  [AsyncCoreData modelForStoreID:pm.storeID];
+                    
+                    NSLog(@"A- pm:%@ %p",p1,p2);
+                }
+            });
+            
+            [DB_PLACE modelsWithPredicateAsync:p inRange:NSMakeRange(0, 999) sortByKey:nil reverse:NO completion:^(NSArray *results) {
+                
+                //  NSLog(@"readDataAsync:%@",results);
+                
+                for(PlaceModel *pm in results) {
+                    PlaceModel *p1 =  [AsyncCoreData modelForStoreUrl:pm.StoreUrl];
+                    PlaceModel *p2 =  [AsyncCoreData modelForStoreID:pm.storeID];
+                    
+                    NSLog(@"B- pm:%@ %p",p1,p2);
+                }
+            }];
+        }
+        
+    }];
+    
+}
+
+
 -(IBAction)clearAllData:(id)btn {
     
     for(int i=0; i<3;i++) {
+        [AsyncCoreData invalidatePersistantSotre];
         NSError *error;
         NSString *name = [self.segControl titleForSegmentAtIndex:self.segControl.selectedSegmentIndex];
         NSURL *docUrl = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
         NSURL *dataBaseFileUrl = [docUrl URLByAppendingPathComponent:[NSString stringWithFormat:@"%@.sqlite",name]];
         [[NSFileManager defaultManager] removeItemAtURL:dataBaseFileUrl error:&error];
+        NSLog(@"Remove %@ error %@",[dataBaseFileUrl lastPathComponent],error);
+        
+        dataBaseFileUrl = [docUrl URLByAppendingPathComponent:[NSString stringWithFormat:@"%@.sqlite-shm",name]];
+        [[NSFileManager defaultManager] removeItemAtURL:dataBaseFileUrl error:&error];
+        NSLog(@"Remove %@ error %@",[dataBaseFileUrl lastPathComponent],error);
+        
+        dataBaseFileUrl = [docUrl URLByAppendingPathComponent:[NSString stringWithFormat:@"%@.sqlite-wal",name]];
+        [[NSFileManager defaultManager] removeItemAtURL:dataBaseFileUrl error:&error];
+        
         NSLog(@"Remove %@ error %@",[dataBaseFileUrl lastPathComponent],error);
     }
 }

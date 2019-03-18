@@ -382,7 +382,7 @@ static NSRecursiveLock *sWriteLock;
         //在执行block前要保证NSManagedObject.managedObjectContext依然存在，否则会引发fault data
         m = blk(nil, DBModel);
         m.storeID = DBModel.objectID;
-        [self cacheModel:DBModel forEntity:entityName];
+        [self cacheModel:m forEntity:entityName];
     }
     return m;
 }

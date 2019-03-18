@@ -93,7 +93,7 @@ static NSRecursiveLock *sWriteLock;
     }
     
     if(obj && obj.storeID)
-        [subMap setObject:obj forKey:obj.storeID.URIRepresentation];
+        [subMap setObject:obj forKey:obj.storeID.URIRepresentation.absoluteString];
     
     _remove_cache_lock();
 }
@@ -106,12 +106,13 @@ static NSRecursiveLock *sWriteLock;
     _add_cache_lock();
     
     NSMutableDictionary *subMap = [sDataBaseCacheMap objectForKey:rootKey];
+    id retObj = nil;
     if (subMap)
-        return [subMap objectForKey:dbModel.objectID.URIRepresentation];
-    else
-        return nil;
-    
+        retObj = [subMap objectForKey:dbModel.objectID.URIRepresentation.absoluteString];
+
     _remove_cache_lock();
+    
+    return retObj;
 }
 
 +(void)removeCachedModelForDBModel:(nonnull NSManagedObject *)dbModel forEntity:(NSString *)entityName
@@ -120,7 +121,7 @@ static NSRecursiveLock *sWriteLock;
     _add_cache_lock();
     NSMutableDictionary *subMap = [sDataBaseCacheMap objectForKey:rootKey];
     if (subMap)
-        return [subMap removeObjectForKey:dbModel.objectID.URIRepresentation];
+        [subMap removeObjectForKey:dbModel.objectID.URIRepresentation.absoluteString];
     _remove_cache_lock();
 }
 

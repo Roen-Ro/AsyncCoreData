@@ -81,39 +81,39 @@
 -(NSArray *)dataToWrite {
     
     PlaceModel *m1 = [PlaceModel new];
-    m1.name = @"吉安";
+    m1.name = @"F-5";
     m1.country = @"China";
-    m1.level = 4;
+    m1.level = 5;
     m1.zipCode = [NSString stringWithFormat:@"%@-C001",self.SubFixStr];
     
     PlaceModel *m2 = [PlaceModel new];
-    m2.name = @"南昌";
+    m2.name = @"F-4";
     m2.country = @"China";
-    m2.level = 3;
+    m2.level = 4;
     m2.zipCode = [NSString stringWithFormat:@"%@-C002",self.SubFixStr];
     
     PlaceModel *m3 = [PlaceModel new];
-    m3.name = @"帝都";
+    m3.name = @"F-3";
     m3.country = @"China";
-    m3.level = 1;
+    m3.level = 3;
     m3.zipCode = [NSString stringWithFormat:@"%@-C003",self.SubFixStr];
     
     PlaceModel *m4 = [PlaceModel new];
-    m4.name = @"London";
+    m4.name = @"F-2";
     m4.country = @"British";
-    m4.level = 1;
+    m4.level = 2;
     m4.zipCode = [NSString stringWithFormat:@"%@-E001",self.SubFixStr];
     
     PlaceModel *m5 = [PlaceModel new];
-    m5.name = @"NewYork";
+    m5.name = @"F-1";
     m5.country = @"USA";
     m5.level = 1;
     m5.zipCode = [NSString stringWithFormat:@"%@-A001",self.SubFixStr];
     
     PlaceModel *m6 = [PlaceModel new];
-    m6.name = @"Not Found";
+    m6.name = @"F-6";
     m6.country = @"Outter Space";
-    m6.level = 1;
+    m6.level = 6;
     m6.zipCode = nil;
     
     return @[m1,m2,m3,m4,m5,m6];
@@ -153,17 +153,44 @@
     NSLog(@"readDataCustom: %@", list);
 }
 
+- (IBAction)sort_reverse:(id)sender {
+    
+    NSRange rg = NSMakeRange(1, 3);
+    NSLog(@"\n==================BY INSERT ORDER=======================\n");
+    NSArray *allDatas = [DB_PLACE modelsWithPredicate:nil inRange:NSMakeRange(0, 11112) sortByKey:nil reverse:NO];
+    NSLog(@"allDatas::%@",allDatas);
+    
+    NSArray *r1 = [DB_PLACE modelsWithPredicate:nil inRange:rg sortByKey:nil reverse:NO];
+    NSLog(@"Range(1,3):%@",r1);
+    
+    NSArray *r2 = [DB_PLACE modelsWithPredicate:nil inRange:rg sortByKey:nil reverse:YES];
+    NSLog(@"Range(1,3) reversed:%@",r2);
+    
+    NSLog(@"\n==================SORT BY 'level'=======================\n");
+    allDatas = [DB_PLACE modelsWithPredicate:nil inRange:NSMakeRange(0, 111112) sortByKey:@"level" reverse:NO];
+    NSLog(@"allDatas::%@",allDatas);
+    
+    r1 = [DB_PLACE modelsWithPredicate:nil inRange:rg sortByKey:@"level" reverse:NO];
+    NSLog(@"Range(1,3):%@",r1);
+    
+    r2 = [DB_PLACE modelsWithPredicate:nil inRange:rg sortByKey:@"level" reverse:YES];
+    NSLog(@"Range(1,3) reversed:%@",r2);
+    
+    
+    
+}
+
 - (IBAction)multiThreadTest:(id)sender {
     
     PlaceModel *m1 = [PlaceModel new];
-    m1.name = @"柏林";
+    m1.name = @"Dup柏林";
     m1.country = @"XXOO";
     m1.level = 1;
     m1.zipCode = [NSString stringWithFormat:@"%d",rand()%10];
     
     
     PlaceModel *m2 = [PlaceModel new];
-    m2.name = @"印度";
+    m2.name = @"Dup印度";
     m2.country = @"XXOO";
     m2.level = 1;
     m2.zipCode = [NSString stringWithFormat:@"%d",rand()%10];;

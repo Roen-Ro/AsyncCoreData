@@ -97,8 +97,17 @@
                                     <action selector="readDataCustom:" destination="whP-gf-Uak" eventType="touchUpInside" id="uZO-9d-v10"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="evz-FM-Xov">
+                                <rect key="frame" x="82" y="430" width="211" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <state key="normal" title="sort - reverse"/>
+                                <connections>
+                                    <action selector="sort_reverse:" destination="whP-gf-Uak" eventType="touchUpInside" id="rCH-8u-Etp"/>
+                                </connections>
+                            </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fvW-c9-PRd">
-                                <rect key="frame" x="81" y="431" width="211" height="30"/>
+                                <rect key="frame" x="82" y="476" width="211" height="30"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <state key="normal" title="MltiThread Test"/>

@@ -327,7 +327,7 @@ static NSRecursiveLock *sWriteLock;
     NSError *e;
     for(id v in modelUniquevalues) {
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"uniqueID = %@",v];
-        NSArray<NSManagedObject *> *a = [self queryEntity:entityName dbModelsWithPredicate:predicate inRange:NSMakeRange(0, NSUIntegerMax) sortByKey:nil reverse:YES inContext:context]; //YES效率会比较高
+        NSArray<NSManagedObject *> *a = [self queryEntity:entityName dbModelsWithPredicate:predicate inRange:NSMakeRange(0, NSUIntegerMax) sortByKey:nil reverse:NO inContext:context];
         for(NSManagedObject *mobj in a) {
             [context deleteObject:mobj];
         }
@@ -358,7 +358,7 @@ static NSRecursiveLock *sWriteLock;
     
     _add_write_lock();
     NSError *e;
-    NSArray<NSManagedObject *> *a = [self queryEntity:entityName dbModelsWithPredicate:predicate inRange:NSMakeRange(0, NSUIntegerMax) sortByKey:nil reverse:YES inContext:context]; //YES效率会比较高
+    NSArray<NSManagedObject *> *a = [self queryEntity:entityName dbModelsWithPredicate:predicate inRange:NSMakeRange(0, NSUIntegerMax) sortByKey:nil reverse:NO inContext:context];
     for(NSManagedObject *mobj in a) {
         [context deleteObject:mobj];
     }
@@ -401,7 +401,7 @@ static NSRecursiveLock *sWriteLock;
         predicate = [NSPredicate predicateWithFormat:@"uniqueID = %@",model.uniqueValue];
     
     if(predicate) {
-        NSArray *results = [self queryEntity:entityName dbModelsWithPredicate:predicate inRange:NSMakeRange(0, NSIntegerMax) sortByKey:nil reverse:YES inContext:context];
+        NSArray *results = [self queryEntity:entityName dbModelsWithPredicate:predicate inRange:NSMakeRange(0, NSIntegerMax) sortByKey:nil reverse:NO inContext:context];
         retObj = [self inter_filtOutOnlyEntityInResultList:results inContext:context];
     }
     else if(model.storeID)
@@ -528,7 +528,7 @@ static NSRecursiveLock *sWriteLock;
     
     if(sortKey)
     {
-        NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:sortKey ascending:!reverse];
+        NSSortDescriptor *sortDescriptor = [NSSortDescriptor sortDescriptorWithKey:sortKey ascending:YES];//ascending value must be YES
         if(frqs.sortDescriptors)
         {
             NSArray *sortDescriptors = frqs.sortDescriptors;
@@ -591,7 +591,7 @@ static NSRecursiveLock *sWriteLock;
         
     }
     
-    if(!sortKey && reverse)
+    if(reverse)
     {
         
 #if 0

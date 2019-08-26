@@ -228,7 +228,7 @@ static NSRecursiveLock *sWriteLock;
         
     for(NSObject<UniqueValueProtocol> *m in dCopy) {
         
-        NSManagedObject *DBm = [self queryEntity:entityName DBModelForModel:m createIfNotExist:YES inContext:context];
+         NSManagedObject *DBm = [self queryEntity:entityName DBModelForModel:m createIfNotExist:YES inContext:context];
         if(DBm) {
             
             T_ModelToManagedObjectBlock blk = [sSettingDBValuesBlockMap objectForKey:entityName];
@@ -327,6 +327,7 @@ static NSRecursiveLock *sWriteLock;
     NSError *e;
     for(id v in modelUniquevalues) {
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"uniqueID = %@",v];
+#warning todo 为了节省内容，采取分批获取进行优化
         NSArray<NSManagedObject *> *a = [self queryEntity:entityName dbModelsWithPredicate:predicate inRange:NSMakeRange(0, NSUIntegerMax) sortByKey:nil reverse:NO inContext:context];
         for(NSManagedObject *mobj in a) {
             [context deleteObject:mobj];
@@ -358,6 +359,7 @@ static NSRecursiveLock *sWriteLock;
     
     _add_write_lock();
     NSError *e;
+#warning todo 为了节省内容，采取分批获取进行优化
     NSArray<NSManagedObject *> *a = [self queryEntity:entityName dbModelsWithPredicate:predicate inRange:NSMakeRange(0, NSUIntegerMax) sortByKey:nil reverse:NO inContext:context];
     for(NSManagedObject *mobj in a) {
         [context deleteObject:mobj];
@@ -366,6 +368,54 @@ static NSRecursiveLock *sWriteLock;
     [context save:&e];
     _remove_write_lock();
     return e;
+}
+
+
++(NSError *)queryEntity:(nonnull NSString *)entityName
+updateModelsWithPredicate:(nullable NSPredicate *)predicate
+             withValues:(nonnull NSArray *)values
+                forKeys:(nonnull NSArray <NSString *>*)keys {
+    return [self queryEntity:entityName updateModelsWithPredicate:predicate withValues:values forKeys:keys inContext:[self newContext]];
+}
+
++(void)queryEntity:(nonnull NSString *)entityName
+updateModelsWithPredicateAsync:(nullable NSPredicate *)predicate
+        withValues:(nonnull NSArray *)values
+           forKeys:(nonnull NSArray <NSString *>*)keys
+        completion:(void (^_Nullable)(NSError *_Nullable))block{
+    [self inter_doBackgroundTask:^{
+        NSError *e = [self queryEntity:entityName updateModelsWithPredicate:predicate withValues:values forKeys:keys inContext:[self newContext]];
+        
+        main_task(^{
+            if(block)
+                block(e);
+        });
+    }];
+}
+
++(NSError *)queryEntity:(nonnull NSString *)entityName
+updateModelsWithPredicate:(nullable NSPredicate *)predicate
+             withValues:(nonnull NSArray *)values
+                forKeys:(nonnull NSArray <NSString *>*)keys
+              inContext:(NSManagedObjectContext *)context {
+
+    _add_write_lock();
+#warning todo 为了节省内容，采取分批获取进行优化
+    NSError *e;
+    NSArray<NSManagedObject *> *a = [self queryEntity:entityName dbModelsWithPredicate:predicate inRange:NSMakeRange(0, NSUIntegerMax) sortByKey:nil reverse:NO inContext:context];
+    
+    NSUInteger c = MIN(values.count, keys.count);
+    for(NSManagedObject *mobj in a) {
+        
+        for(int i = 0; i<c; i++) {
+            [mobj setValue:values[i] forKey:keys[i]];
+        }
+    }
+    
+    [context save:&e];
+    _remove_write_lock();
+    return e;
+    
 }
 
 #pragma mark- find out

@@ -53,31 +53,43 @@
     a> 若数据模型本身是从数据库中读取的，则删除数据模型对应的数据库记录
     b> 若数据模型不是来源于数据库中，则忽略
  */
-+(NSError *)queryEntity:(nonnull NSString *)entityName
++(nullable NSError *)queryEntity:(nonnull NSString *)entityName
            deleteModels:(nonnull NSArray<id<UniqueValueProtocol>> *)models;
 
 +(void)queryEntity:(nonnull NSString *)entityName
  deleteModelsAsync:(nonnull NSArray<id<UniqueValueProtocol>> *)models
-        completion:(void (^)(NSError *))block;
+        completion:(void (^_Nullable)(NSError *_Nullable))block;
 
 
 //根据数据模型uniqueValue值删除数据库中对应记录
-+(NSError *)queryEntity:(nonnull NSString *)entityName
++(nullable NSError *)queryEntity:(nonnull NSString *)entityName
     deleteModelsWithUniquevalues:(nonnull NSArray *)modelUniquevalues;
 
 +(void)queryEntity:(nonnull NSString *)entityName
        deleteModelsWithUniquevaluesAsync:(nonnull NSArray *)modelUniquevalues
-                                completion:(void (^)(NSError *))block;
+        completion:(void (^_Nullable)(NSError *_Nullable))block;
 
 
 //按设定条件删除记录
-+(NSError *)queryEntity:(nonnull NSString *)entityName
++(nullable NSError *)queryEntity:(nonnull NSString *)entityName
     deleteModelsWithPredicate:(nullable NSPredicate *)predicate;
 
 +(void)queryEntity:(nonnull NSString *)entityName
     deleteModelsWithPredicateAsync:(nullable NSPredicate *)predicate
-                        completion:(void (^)(NSError *))block;
+                        completion:(void (^_Nullable)(NSError *_Nullable))block;
 
+
+//按条件批量更新
++(nullable NSError *)queryEntity:(nonnull NSString *)entityName
+updateModelsWithPredicate:(nullable NSPredicate *)predicate
+             withValues:(nonnull NSArray *)values
+                forKeys:(nonnull NSArray <NSString *>*)keys;
+
++(void)queryEntity:(nonnull NSString *)entityName
+updateModelsWithPredicateAsync:(nullable NSPredicate *)predicate
+             withValues:(nonnull NSArray *)values
+                forKeys:(nonnull NSArray <NSString *>*)keys
+             completion:(void (^_Nullable)(NSError *_Nullable))block;
 
 
 #pragma mark- filt out
@@ -92,16 +104,16 @@
  @param reverse 是否按照插入顺序反序输出， YES先插入的在后面，NO后插入的在前面
  @return 返回查询到的“数据模型”数组
  */
-+(NSArray *)queryEntity:(nonnull NSString *)entityName
++(nullable NSArray *)queryEntity:(nonnull NSString *)entityName
     modelsWithPredicate:(nullable NSPredicate *)predicate
                 inRange:(NSRange)range
-              sortByKey:(NSString *)sortKey
+              sortByKey:(nullable NSString *)sortKey
                 reverse:(BOOL)reverse;
 
 +(void)queryEntity:(nonnull NSString *)entityName
 modelsWithPredicateAsync:(nullable NSPredicate *)predicate
            inRange:(NSRange)range
-         sortByKey:(NSString *)sortKey
+         sortByKey:(nullable NSString *)sortKey
            reverse:(BOOL)reverse
         completion:(void (^)(NSArray *))block;
 

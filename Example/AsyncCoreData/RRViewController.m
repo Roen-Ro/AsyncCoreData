@@ -153,6 +153,15 @@
     NSLog(@"readDataCustom: %@", list);
 }
 
+//批量按条件更新
+- (IBAction)batchConditonalUpdate:(id)sender {
+    
+    [DB_PLACE updateModelsWithPredicate:[NSPredicate predicateWithFormat:@"country = \"China\""] withValues:@[@(77),@"World"] forKeys:@[@"level",@"country"]];
+    
+    [self readDataCustom:nil];
+}
+
+
 - (IBAction)sort_reverse:(id)sender {
     
     NSRange rg = NSMakeRange(1, 3);

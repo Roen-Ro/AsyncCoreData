@@ -41,30 +41,18 @@ extern NSRunLoop *sBgNSRunloop;
     void (^busniessBlock)(void) =  ^{
         
         NSPersistentStoreCoordinator *persistantStoreCord = [sPersistantStoreMap objectForKey:key];
+        BOOL needAddPst = NO;
         if(!persistantStoreCord) {
-            
+            needAddPst = YES;
             NSManagedObjectModel *mobjModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:coreDataModelFileUrl];
-            NSError *error = nil;
+            
             persistantStoreCord = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mobjModel];
             
-            NSDictionary *options;
-            if(iName){
-                options = @{NSMigratePersistentStoresAutomaticallyOption:@YES,
-                                          NSInferMappingModelAutomaticallyOption:@YES,
-                                          NSPersistentStoreUbiquitousContentNameKey:iName,
-                                          };
-            }
-            else {
-                options = @{NSMigratePersistentStoresAutomaticallyOption:@YES,
-                            NSInferMappingModelAutomaticallyOption:@YES,
-                            };
-            }
-
-            
-            [persistantStoreCord addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:destUrl options:options error:&error];
-            
-            NSAssert(!error, @"persistentStoreCord error %@",error.description);
+            //因为NSPersistentStoreCoordinatorStoresWillChangeNotification会在addPersistentStoreWithType时候触发，所以这里保存persistantStoreCord要在addPersistentStoreWithType 之前
             [sPersistantStoreMap setObject:persistantStoreCord forKey:key];
+            
+           
+           // [sPersistantStoreMap setObject:persistantStoreCord forKey:key];
         }
         
         NSString *classIndependentKey = NSStringFromClass([self class]);
@@ -75,6 +63,29 @@ extern NSRunLoop *sBgNSRunloop;
                 [sPersistantStoreClassMap setObject:persistantStoreCord forKey:classIndependentKey];
             }
         }
+        
+        if(needAddPst) {
+            
+            NSError *error = nil;
+            NSDictionary *options;
+            if(iName){
+                options = @{NSMigratePersistentStoresAutomaticallyOption:@YES,
+                            NSInferMappingModelAutomaticallyOption:@YES,
+                            NSPersistentStoreUbiquitousContentNameKey:iName,
+                            };
+                [self registerForiCloudNotificationsForPersistentCoordinator:persistantStoreCord];
+                
+            }
+            else {
+                options = @{NSMigratePersistentStoresAutomaticallyOption:@YES,
+                            NSInferMappingModelAutomaticallyOption:@YES,
+                            };
+            }
+
+            [persistantStoreCord addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:destUrl options:options error:&error];
+             NSAssert(!error, @"persistentStoreCord error %@",error.description);
+        }
+        
         
         main_task(mainThreadBlock);
     };
@@ -118,12 +129,77 @@ extern NSRunLoop *sBgNSRunloop;
 
 
 +(NSManagedObjectContext *)newContext {
+#warning test
+#if 1
+    static NSManagedObjectContext *context = nil;
+    if(!context) {
+        context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
+        NSPersistentStoreCoordinator *psc = [self  persistentStoreCoordinator];
+        [context setPersistentStoreCoordinator:psc];
+    }
+    return context;
+#else
     NSManagedObjectContext *context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
     [context setPersistentStoreCoordinator:[self  persistentStoreCoordinator]];
     return context;
+#endif
+
 }
 
+#pragma mark- icloud
++ (void)registerForiCloudNotificationsForPersistentCoordinator:(NSPersistentStoreCoordinator *)persistentStoreCoordinator {
+    NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
+    
+    [notificationCenter addObserver:self
+                           selector:@selector(storesWillChange:)
+                               name:NSPersistentStoreCoordinatorStoresWillChangeNotification
+                             object:persistentStoreCoordinator];
+    
+    [notificationCenter addObserver:self
+                           selector:@selector(storesDidChange:)
+                               name:NSPersistentStoreCoordinatorStoresDidChangeNotification
+                             object:persistentStoreCoordinator];
+    
+    [notificationCenter addObserver:self
+                           selector:@selector(persistentStoreDidImportUbiquitousContentChanges:)
+                               name:NSPersistentStoreDidImportUbiquitousContentChangesNotification
+                             object:persistentStoreCoordinator];
+}
 
++(void)storesWillChange:(NSNotification *)notification {
+    NSLog(@"%s:%@",__PRETTY_FUNCTION__,notification);
+}
+
++(void)storesDidChange:(NSNotification *)notification {
+    NSLog(@"%s:%@",__PRETTY_FUNCTION__,notification);
+#warning 新创建context可能没有卵用哦
+    NSManagedObjectContext *context = [self newContext];
+    
+    [context performBlockAndWait:^{
+        NSError *error;
+        
+        if ([context hasChanges]) {
+            BOOL success = [context save:&error];
+            
+            if (!success && error) {
+                // 执行错误处理
+                NSLog(@"%@",[error localizedDescription]);
+            }
+        }
+        
+        [context reset];
+    }];
+}
+
++(void)persistentStoreDidImportUbiquitousContentChanges:(NSNotification *)changeNotification {
+#warning 新创建context可能没有卵用哦
+    NSLog(@"%s:%@",__PRETTY_FUNCTION__,changeNotification);
+    NSManagedObjectContext *context = [self newContext];
+    
+    [context performBlock:^{
+        [context mergeChangesFromContextDidSaveNotification:changeNotification];
+    }];
+}
 
 @end
 

@@ -224,15 +224,52 @@ static NSRecursiveLock *sWriteLock;
     NSArray *dCopy = [NSArray arrayWithArray:datas];
     NSMutableArray *modelArray_, *dbArray_;
     NSError *retError;
+    
+    //为了兼容老版本，本来直接在xcode中设置entity的constraints就可以了
+    BOOL usePredicateToFiltUniqueness = YES;
+    NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:context];
+    if(entity.uniquenessConstraints.count > 0) {
+        entity.uniquenessConstraints = @[@[@"uniqueID"]];
+    }
+    
+    for(NSArray *a in entity.uniquenessConstraints) {
+        for(id key in a) {
+            if([key isKindOfClass:[NSString class]]) {
+                if([key isEqualToString:@"uniqueID"]) {
+                    usePredicateToFiltUniqueness = NO;
+                    break;
+                }
+            }
+            else if([key isKindOfClass:[NSAttributeDescription class]]) {
+                NSAttributeDescription *k = (NSAttributeDescription *)key;
+                if([k.name isEqualToString:@"uniqueID"]) {
+                    usePredicateToFiltUniqueness = NO;
+                    break;
+                }
+            }
+        }
+        
+        if( !usePredicateToFiltUniqueness)
+            break;
+    }
+    if(!usePredicateToFiltUniqueness)
+        context.mergePolicy = [[NSMergePolicy alloc] initWithMergeType:NSMergeByPropertyObjectTrumpMergePolicyType];
+    
     _add_write_lock();
         
     for(NSObject<UniqueValueProtocol> *m in dCopy) {
         
-         NSManagedObject *DBm = [self queryEntity:entityName DBModelForModel:m createIfNotExist:YES inContext:context];
+        NSManagedObject *DBm;
+        if(usePredicateToFiltUniqueness)
+            DBm = [self queryEntity:entityName DBModelForModel:m createIfNotExist:YES inContext:context];
+        else
+            DBm = [[NSManagedObject alloc] initWithEntity:entity insertIntoManagedObjectContext:context];
+
+
         if(DBm) {
             
             T_ModelToManagedObjectBlock blk = [sSettingDBValuesBlockMap objectForKey:entityName];
-            NSAssert(blk, @"model mapper block haven't set for entity %@, Use +[AsyncCoreData setModelToDataBaseMapper:forEntity:] method to setup",entityName);
+            NSAssert(blk, @"model's mapper block hasn't set for entity %@, Use +[AsyncCoreData setModelToDataBaseMapper:forEntity:] method to setup",entityName);
             blk(m, DBm);
 
             //   [self cacheObject:m forManagedObject:DBm]; //cacke比较复杂 如果是更新操作的话，之前的步骤会保证cacke，如果是插入操作的话，到后面再cacke
@@ -292,13 +329,40 @@ static NSRecursiveLock *sWriteLock;
     
     NSArray *dCopy = [NSArray arrayWithArray:models];
     NSError *retError;
+    
+    void (^deleteEntity)(id a) =  ^(id obj) {
+        if([obj isKindOfClass:[NSManagedObject class]]) {
+            [self removeCachedModelForDBModel:obj forEntity:entityName];
+            [context deleteObject:obj];
+        }
+        else if([obj isKindOfClass:[NSArray class]]) {
+            for(NSManagedObject *dbm in obj) {
+                [self removeCachedModelForDBModel:dbm forEntity:entityName];
+                [context deleteObject:dbm];
+            }
+        }
+    };
+    
     _add_write_lock();
     for(NSObject<UniqueValueProtocol> *m in dCopy) {
         
-        NSManagedObject *dbm = [self queryEntity:entityName existingDBModelForModel:m inContext:context];
+        NSManagedObject *dbm = nil;
+        if(m.storeID)
+            dbm = [context objectWithID:m.storeID];
+        
         if(dbm) {
-            [self removeCachedModelForDBModel:dbm forEntity:entityName];
-            [context deleteObject:dbm];
+            deleteEntity(dbm);
+        }
+        else
+        {
+            NSPredicate *predicate = nil;
+            if(m.uniqueValue) {
+                predicate = [NSPredicate predicateWithFormat:@"uniqueID = %@",m.uniqueValue];
+                
+                NSArray *results = [self queryEntity:entityName dbModelsWithPredicate:predicate inRange:NSMakeRange(0, NSIntegerMax) sortByKey:nil reverse:NO inContext:context];
+                
+                deleteEntity(results);
+            }
         }
     }
     [context save:&retError];
@@ -464,12 +528,12 @@ updateModelsWithPredicate:(nullable NSPredicate *)predicate
 }
 
 +(NSManagedObject *)queryEntity:(NSString *)entityName DBModelForModel:(__kindof NSObject<UniqueValueProtocol> *)model createIfNotExist:(BOOL)create inContext:(NSManagedObjectContext *)context {
-    
+
     NSManagedObject *retObj = [self  queryEntity:entityName existingDBModelForModel:model inContext:context];
-    
+
     if(!retObj && create)
         retObj = [NSEntityDescription insertNewObjectForEntityForName:entityName inManagedObjectContext:context];
-    
+
     return retObj;
 }
 

@@ -23,14 +23,21 @@ typedef __kindof NSObject  * _Nonnull  (^T_ModelFromManagedObjectBlock)(__kindof
  假如MyMessageManager 继承自 AsyncCoreData
  ```objc
  [AsyncCoreData setPersistantStore:url1 withModel:@"mymodel1" completion:^{}];
- [MyMessageManager setPersistantStore:url2 withModel:@"mymodel2" completion:^{}];
+ [MyMessageManager setPersistantStore:url2 withModel:@"mymodel2" icloudStoreName:@"myIcloudCoreData" completion:^{}];
  ```
  AsyncCoreData 对应为 存储在url1的，对应数据模型为mymodel1的数据库
- MyMessageManager 对应为 存储在url2的，对应数据模型为mymodel2的数据库
+ MyMessageManager 对应为 存储在url2的，对应数据模型为mymodel2的数据库,其数据会进行icloud同步
+ (必须在Xcode中的Capabilities将你的项目打开iCloud功能,必须勾选[iCloud Documents] 并且也在开发中心设置iCloud container; core data icloud 设计参考 https://developer.apple.com/documentation/coredata/synchronizing_a_local_store_to_the_cloud?language=objc
+  https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/UsingCoreDataWithiCloudPG/Introduction/Introduction.html )
  如果不设置MyMessageManager的话，那么MyMessageManager默认使用AsyncCoreData的设置
  */
 +(void)setPersistantStore:(nullable NSURL *)persistantFileUrl
                 withModel:(nonnull NSString *)modelName
+               completion:(void(^ _Nonnull )(void))mainThreadBlock;
+
++(void)setPersistantStore:(nullable NSURL *)persistantFileUrl
+                withModel:(nonnull NSString *)modelName
+          icloudStoreName:(nullable NSString *)iName
                completion:(void(^ _Nonnull )(void))mainThreadBlock;
 
 

@@ -44,7 +44,7 @@
 
 /* Begin PBXFileReference section */
 		1054570540742526255AFA5AB23C010F /* Pods-AsyncCoreData_Example-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-AsyncCoreData_Example-dummy.m"; sourceTree = "<group>"; };
-		10B1E718192141AF986947137404E46E /* AsyncCoreData.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = AsyncCoreData.framework; path = AsyncCoreData.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		10B1E718192141AF986947137404E46E /* AsyncCoreData.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AsyncCoreData.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		10DB9534996A185707DACB1C96DF6713 /* Pods-AsyncCoreData_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-AsyncCoreData_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		1747D068BEEDF963EB5D41F02AF25552 /* Pods-AsyncCoreData_Example-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-AsyncCoreData_Example-frameworks.sh"; sourceTree = "<group>"; };
 		1B2DE6930256A190A69016E9BEBBB36F /* AsyncCoreData-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "AsyncCoreData-prefix.pch"; sourceTree = "<group>"; };
@@ -64,23 +64,23 @@
 		8A72AD6D47FD218ADCE20ECD6DD2EE5D /* UniqueValueProtocol.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = UniqueValueProtocol.h; path = AsyncCoreData/Classes/UniqueValueProtocol.h; sourceTree = "<group>"; };
 		91EB5DD06E5A56E3F968F1E0D970A94C /* Pods-AsyncCoreData_Example-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-AsyncCoreData_Example-Info.plist"; sourceTree = "<group>"; };
 		96DE9A8C230D9E945FDF893E72412C96 /* Pods-AsyncCoreData_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-AsyncCoreData_Example.release.xcconfig"; sourceTree = "<group>"; };
-		9D353092D292C0B63C1ADF22D87F0794 /* Pods_AsyncCoreData_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_AsyncCoreData_Example.framework; path = "Pods-AsyncCoreData_Example.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
-		AA132BF51CDEB0A0F6785F2487D65B42 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; path = README.md; sourceTree = "<group>"; };
+		9D353092D292C0B63C1ADF22D87F0794 /* Pods_AsyncCoreData_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_AsyncCoreData_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA132BF51CDEB0A0F6785F2487D65B42 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		AC01FD69E02DFA7903B9D514213588D0 /* Pods-AsyncCoreData_Example-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-AsyncCoreData_Example-acknowledgements.markdown"; sourceTree = "<group>"; };
-		B36AB396275697EEE1A5B13BA8A38FE3 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		B36AB396275697EEE1A5B13BA8A38FE3 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		BBA47C7F5701485075B81CCF06AD6E06 /* AsyncHelper.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = AsyncHelper.m; path = AsyncCoreData/Classes/AsyncHelper.m; sourceTree = "<group>"; };
 		C236FB16BB8C93337DEF41AFC534AD77 /* AsyncCoreData+Configration.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "AsyncCoreData+Configration.m"; path = "AsyncCoreData/Classes/AsyncCoreData+Configration.m"; sourceTree = "<group>"; };
 		C610DDF04DE06AB93A90E477BF1B3381 /* Pods-AsyncCoreData_Tests-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-AsyncCoreData_Tests-Info.plist"; sourceTree = "<group>"; };
-		CE1D679E7BF09D230C96CD11353C7399 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; path = LICENSE; sourceTree = "<group>"; };
+		CE1D679E7BF09D230C96CD11353C7399 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		D6DFF15000AFE2A371BF499E7AFDA808 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		D9799293D0C958990CC1C0BC1FB7DEDD /* AsyncCoreData-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "AsyncCoreData-umbrella.h"; sourceTree = "<group>"; };
 		DB6FB218A5A20E2DC4B5F8C6CCD4FB75 /* Pods-AsyncCoreData_Example-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-AsyncCoreData_Example-umbrella.h"; sourceTree = "<group>"; };
 		DEDB43567DECBBD1A69E0AF88FF891C0 /* AsyncHelper.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = AsyncHelper.h; path = AsyncCoreData/Classes/AsyncHelper.h; sourceTree = "<group>"; };
-		E3B467CE9AEA5EB63494CAE3A2171CD0 /* Pods_AsyncCoreData_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_AsyncCoreData_Tests.framework; path = "Pods-AsyncCoreData_Tests.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E3B467CE9AEA5EB63494CAE3A2171CD0 /* Pods_AsyncCoreData_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_AsyncCoreData_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4EB5C176AF1AEB76CC28F285AE78B24 /* Pods-AsyncCoreData_Example.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-AsyncCoreData_Example.modulemap"; sourceTree = "<group>"; };
 		F5A6F094795452360CCA40D9F945D9CB /* Pods-AsyncCoreData_Tests.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-AsyncCoreData_Tests.modulemap"; sourceTree = "<group>"; };
 		FC81816C2F78B86BFB107A9C26A1CAAA /* Pods-AsyncCoreData_Example-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-AsyncCoreData_Example-acknowledgements.plist"; sourceTree = "<group>"; };
-		FE06651584389B402009B5919044FD95 /* AsyncCoreData.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = AsyncCoreData.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		FE06651584389B402009B5919044FD95 /* AsyncCoreData.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; path = AsyncCoreData.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -343,6 +343,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 7DB346D0F39D3F0E887471402A8071AB;
@@ -443,7 +444,7 @@
 				GCC_PREFIX_HEADER = "Target Support Files/AsyncCoreData/AsyncCoreData-prefix.pch";
 				INFOPLIST_FILE = "Target Support Files/AsyncCoreData/AsyncCoreData-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MODULEMAP_FILE = "Target Support Files/AsyncCoreData/AsyncCoreData.modulemap";
 				PRODUCT_MODULE_NAME = AsyncCoreData;
@@ -611,8 +612,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRIP_INSTALLED_PRODUCT = NO;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 4.2;
 				SYMROOT = "${SRCROOT}/../build";
 			};
@@ -731,7 +731,7 @@
 				GCC_PREFIX_HEADER = "Target Support Files/AsyncCoreData/AsyncCoreData-prefix.pch";
 				INFOPLIST_FILE = "Target Support Files/AsyncCoreData/AsyncCoreData-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MODULEMAP_FILE = "Target Support Files/AsyncCoreData/AsyncCoreData.modulemap";
 				PRODUCT_MODULE_NAME = AsyncCoreData;

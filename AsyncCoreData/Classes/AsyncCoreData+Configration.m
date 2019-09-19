@@ -19,6 +19,13 @@ extern NSRunLoop *sBgNSRunloop;
 @implementation AsyncCoreData (Configration)
 
 +(void)setPersistantStore:(nullable NSURL *)persistantFileUrl withModel:(nonnull NSString *)modelName completion:(void(^)(void))mainThreadBlock {
+    [self setPersistantStore:persistantFileUrl withModel:modelName icloudStoreName:nil completion:mainThreadBlock];
+}
+
++(void)setPersistantStore:(nullable NSURL *)persistantFileUrl
+                withModel:(nonnull NSString *)modelName
+            icloudStoreName:(nullable NSString *)iName
+               completion:(void(^)(void))mainThreadBlock {
     
     NSURL *destUrl = persistantFileUrl;
     if(!destUrl)
@@ -40,9 +47,19 @@ extern NSRunLoop *sBgNSRunloop;
             NSError *error = nil;
             persistantStoreCord = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mobjModel];
             
-            NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:
-                                     [NSNumber numberWithBool:YES], NSMigratePersistentStoresAutomaticallyOption,
-                                     [NSNumber numberWithBool:YES], NSInferMappingModelAutomaticallyOption, nil];
+            NSDictionary *options;
+            if(iName){
+                options = @{NSMigratePersistentStoresAutomaticallyOption:@YES,
+                                          NSInferMappingModelAutomaticallyOption:@YES,
+                                          NSPersistentStoreUbiquitousContentNameKey:iName,
+                                          };
+            }
+            else {
+                options = @{NSMigratePersistentStoresAutomaticallyOption:@YES,
+                            NSInferMappingModelAutomaticallyOption:@YES,
+                            };
+            }
+
             
             [persistantStoreCord addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:destUrl options:options error:&error];
             

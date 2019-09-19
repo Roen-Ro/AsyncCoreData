@@ -13,7 +13,7 @@
 @protocol UniqueValueProtocol <NSObject>
 
 @required
-@property (nullable, readonly) id uniqueValue; //One of NSNumber NSString NSSDate type
+@property (nullable, readonly) NSString *uniqueValue; 
 
 @end
 

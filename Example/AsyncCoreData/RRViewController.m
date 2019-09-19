@@ -18,7 +18,7 @@
 @property (nonatomic, strong) AsyncCoreData *dbManager;
 @property (weak, nonatomic) IBOutlet UISegmentedControl *segControl;
 @property (nonatomic, copy) NSString *SubFixStr;
-
+@property (nonatomic, copy) NSArray *tmpCacheSpecialModels;
 @end
 
 @implementation RRViewController
@@ -62,12 +62,12 @@
     NSURL *docUrl = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
     NSURL *dataBaseFileUrl = [docUrl URLByAppendingPathComponent:[NSString stringWithFormat:@"%@.sqlite",name]];
     
-    [AsyncCoreData setPersistantStore:dataBaseFileUrl withModel:@"RRCDModel" completion:^{
+    self.SubFixStr = [self.segControl titleForSegmentAtIndex:self.segControl.selectedSegmentIndex];
+    
+    [AsyncCoreData setPersistantStore:dataBaseFileUrl withModel:@"RRCDModel" icloudStoreName:self.SubFixStr completion:^{
         NSLog(@"Data Base changed to %@",name);
 
     }];
-    
-      self.SubFixStr = [self.segControl titleForSegmentAtIndex:self.segControl.selectedSegmentIndex];
 }
 
 -(IBAction)changeToCurrentStore:(id)sender {
@@ -76,13 +76,11 @@
 
 
 
-
-
 -(NSArray *)dataToWrite {
     
     PlaceModel *m1 = [PlaceModel new];
     m1.name = @"F-5";
-    m1.country = @"China";
+    m1.country = @"Russia";
     m1.level = 5;
     m1.zipCode = [NSString stringWithFormat:@"%@-C001",self.SubFixStr];
     
@@ -94,7 +92,7 @@
     
     PlaceModel *m3 = [PlaceModel new];
     m3.name = @"F-3";
-    m3.country = @"China";
+    m3.country = @"FINNA";
     m3.level = 3;
     m3.zipCode = [NSString stringWithFormat:@"%@-C003",self.SubFixStr];
     
@@ -116,7 +114,14 @@
     m6.level = 6;
     m6.zipCode = nil;
     
-    return @[m1,m2,m3,m4,m5,m6];
+    PlaceModel *m7 = [PlaceModel new];
+    m7.name = @"F-7";
+    m7.country = @"USA";
+    m7.level = 2;
+    m7.zipCode =  m3.zipCode = [NSString stringWithFormat:@"%@-C007",self.SubFixStr];
+    
+    self.tmpCacheSpecialModels = @[m1,m6];
+    return @[m1,m2,m3,m4,m5,m6,m7];
 }
 
 - (IBAction)writeData:(id)sender {
@@ -127,7 +132,7 @@
 
 - (IBAction)readData:(id)sender {
     
-    NSArray *results =  [DB_PLACE modelsWithPredicate:[NSPredicate predicateWithFormat:@"country = \"China\""] inRange:NSMakeRange(0, 999) sortByKey:nil reverse:YES];
+    NSArray *results =  [DB_PLACE modelsWithPredicate:nil inRange:NSMakeRange(0, 999) sortByKey:nil reverse:YES];
     NSLog(@"readData:%@",results);
 }
 
@@ -185,8 +190,6 @@
     r2 = [DB_PLACE modelsWithPredicate:nil inRange:rg sortByKey:@"level" reverse:YES];
     NSLog(@"Range(1,3) reversed:%@",r2);
     
-    
-    
 }
 
 - (IBAction)multiThreadTest:(id)sender {
@@ -238,6 +241,32 @@
     }];
     
 }
+
+- (IBAction)deleteSomemodels:(id)sender {
+    NSLog(@"-----ALL MODELS-----");
+    NSArray *results =  [DB_PLACE modelsWithPredicate:nil inRange:NSMakeRange(0, 999) sortByKey:nil reverse:YES];
+    NSLog(@"%zu MODELS:%@",results.count,results);
+    
+    [DB_PLACE deleteModels:self.tmpCacheSpecialModels];
+    results =  [DB_PLACE modelsWithPredicate:nil inRange:NSMakeRange(0, 999) sortByKey:nil reverse:YES];
+    NSLog(@"-----AFTER DELETE CACHE MODELS %@-----",self.tmpCacheSpecialModels);
+    NSLog(@"%zu MODELS:%@",results.count,results);
+    
+    NSString *specialZip = [NSString stringWithFormat:@"%@-A001",self.SubFixStr];
+    PlaceModel *m = [PlaceModel new];
+    m.zipCode = specialZip;
+    [DB_PLACE deleteModels:@[m]];
+    results =  [DB_PLACE modelsWithPredicate:nil inRange:NSMakeRange(0, 999) sortByKey:nil reverse:YES];
+    NSLog(@"-----AFTER DELETE %@-----",specialZip);
+    NSLog(@"%zu MODELS:%@",results.count,results);
+    
+    NSString *specialContry  = @"FINNA";
+    [DB_PLACE deleteModelsWithPredicate:[NSPredicate predicateWithFormat:@"country = %@",specialContry]];
+    results =  [DB_PLACE modelsWithPredicate:nil inRange:NSMakeRange(0, 999) sortByKey:nil reverse:YES];
+    NSLog(@"-----AFTER DELETE %@ (predicate)-----",specialContry);
+    NSLog(@"%zu MODELS:%@",results.count,results);
+}
+
 
 
 -(IBAction)clearAllData:(id)btn {

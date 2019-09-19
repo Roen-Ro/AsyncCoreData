@@ -35,12 +35,12 @@
     a> 若数据模型本身是从数据库中读取的，则写入的时候将覆盖原来读取时候对应的那条数据
     b> 若数据模型不是来源于数据库中，则将数据插入到数据表中
  */
-+(NSError *)queryEntity:(nonnull NSString *)entityName
++(nullable NSError *)queryEntity:(nonnull NSString *)entityName
              saveModels:(nonnull NSArray<id<UniqueValueProtocol>> *)datas;
 
 +(void)queryEntity:(nonnull NSString *)entityName
-   saveModelsAsync:(NSArray<id<UniqueValueProtocol>> *)datas
-        completion:(void (^)(NSError *))block;
+   saveModelsAsync:(NSArray<id<UniqueValueProtocol>> *_Nonnull)datas
+        completion:(void (^_Nullable)(NSError *_Nullable))block;
 
 #pragma mark- delete
 

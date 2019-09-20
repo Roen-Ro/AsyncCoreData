@@ -48,7 +48,7 @@ extern NSRunLoop *sBgNSRunloop;
             
             persistantStoreCord = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mobjModel];
             
-            //因为NSPersistentStoreCoordinatorStoresWillChangeNotification会在addPersistentStoreWithType时候触发，所以这里保存persistantStoreCord要在addPersistentStoreWithType 之前
+ //因为NSPersistentStoreCoordinatorStoresWillChangeNotification会在addPersistentStoreWithType时候触发，所以这里保存persistantStoreCord要在addPersistentStoreWithType 之前
             [sPersistantStoreMap setObject:persistantStoreCord forKey:key];
             
            

@@ -18,7 +18,7 @@
 }
 
 -(NSString *)description {
-    return [NSString stringWithFormat:@"<%@ %p>{name:%@; country:%@; zipCode:%@; level:%d} storeID:%@",NSStringFromClass([self class]),self,_name,_country,_zipCode,_level,self.storeID];
+    return [NSString stringWithFormat:@"<%@ %p>{name:%@; country:%@; zipCode:%@; level:%d} storeID:%@\n",NSStringFromClass([self class]),self,_name,_country,_zipCode,_level,self.storeID];
 }
 
 @end

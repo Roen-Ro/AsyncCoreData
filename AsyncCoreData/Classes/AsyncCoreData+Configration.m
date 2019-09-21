@@ -16,6 +16,9 @@ extern NSMutableDictionary *sGettingDBValuesBlockMap;
 
 extern NSRunLoop *sBgNSRunloop;
 
+static NSMutableDictionary *iCloudEnabledClassMap;
+static NSMutableDictionary *sharedMainContextMap;
+
 @implementation AsyncCoreData (Configration)
 
 +(void)setPersistantStore:(nullable NSURL *)persistantFileUrl withModel:(nonnull NSString *)modelName completion:(void(^)(void))mainThreadBlock {
@@ -26,6 +29,8 @@ extern NSRunLoop *sBgNSRunloop;
                 withModel:(nonnull NSString *)modelName
             icloudStoreName:(nullable NSString *)iName
                completion:(void(^)(void))mainThreadBlock {
+    //清除之前的共享context
+    [sharedMainContextMap removeObjectForKey:NSStringFromClass([self class])];
     
     NSURL *destUrl = persistantFileUrl;
     if(!destUrl)
@@ -73,13 +78,21 @@ extern NSRunLoop *sBgNSRunloop;
                             NSInferMappingModelAutomaticallyOption:@YES,
                             NSPersistentStoreUbiquitousContentNameKey:iName,
                             };
+                
                 [self registerForiCloudNotificationsForPersistentCoordinator:persistantStoreCord];
                 
+                if(!iCloudEnabledClassMap)
+                    iCloudEnabledClassMap = [NSMutableDictionary dictionaryWithCapacity:3];
+                
+                
+                [iCloudEnabledClassMap setObject:@YES forKey:NSStringFromClass([self class])];
             }
             else {
                 options = @{NSMigratePersistentStoresAutomaticallyOption:@YES,
                             NSInferMappingModelAutomaticallyOption:@YES,
                             };
+                
+                [iCloudEnabledClassMap removeObjectForKey:NSStringFromClass([self class])];
             }
 
             [persistantStoreCord addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:destUrl options:options error:&error];
@@ -91,6 +104,34 @@ extern NSRunLoop *sBgNSRunloop;
     };
     
     background_async(busniessBlock);
+    
+#if 0
+    //首先创建runloop, 保证所有任务都是在同一个线程执行
+    if(!sBgNSRunloop) {
+
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
+
+            sBgNSRunloop = [NSRunLoop currentRunLoop];
+            [sBgNSRunloop addPort:[NSMachPort port] forMode:NSDefaultRunLoopMode];
+            busniessBlock();
+            CFRunLoopRun();
+        });
+    }
+    else {
+        //CFRunLoopPerformBlock(sBgRunloop, kCFRunLoopDefaultMode, busniessBlock);
+        [sBgNSRunloop performBlock:busniessBlock];
+    }
+#endif
+}
+
+//是否所有操作都只使用mainContext
++(BOOL)useSharedMainContext {
+    
+    NSNumber * bn = [iCloudEnabledClassMap objectForKey:NSStringFromClass([self class])];
+    if(bn)
+        return  bn.boolValue;
+    else
+        return NO;
 }
 
 +(nullable NSPersistentStoreCoordinator *)persistentStoreCoordinator {
@@ -127,22 +168,35 @@ extern NSRunLoop *sBgNSRunloop;
     return retValue;
 }
 
-
-+(NSManagedObjectContext *)newContext {
-#warning test
-#if 1
-    static NSManagedObjectContext *context = nil;
++(NSManagedObjectContext *)sharedMainContext {
+    
+    NSString *k = NSStringFromClass([self class]);
+    NSManagedObjectContext *context = [sharedMainContextMap objectForKey:k];
     if(!context) {
         context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
         NSPersistentStoreCoordinator *psc = [self  persistentStoreCoordinator];
         [context setPersistentStoreCoordinator:psc];
+        if(!sharedMainContextMap)
+            sharedMainContextMap = [NSMutableDictionary dictionaryWithCapacity:3];
+        
+        [sharedMainContextMap setObject:context forKey:k];
     }
     return context;
-#else
+}
+
++(NSManagedObjectContext *)getContext {
+
+    if([self useSharedMainContext])
+        return [self sharedMainContext];
+    else
+        return [self newContext];
+}
+
++(NSManagedObjectContext *)newContext {
+    
     NSManagedObjectContext *context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
     [context setPersistentStoreCoordinator:[self  persistentStoreCoordinator]];
     return context;
-#endif
 
 }
 
@@ -173,7 +227,7 @@ extern NSRunLoop *sBgNSRunloop;
 +(void)storesDidChange:(NSNotification *)notification {
     NSLog(@"%s:%@",__PRETTY_FUNCTION__,notification);
 #warning 新创建context可能没有卵用哦
-    NSManagedObjectContext *context = [self newContext];
+    NSManagedObjectContext *context = [self getContext];
     
     [context performBlockAndWait:^{
         NSError *error;
@@ -194,7 +248,7 @@ extern NSRunLoop *sBgNSRunloop;
 +(void)persistentStoreDidImportUbiquitousContentChanges:(NSNotification *)changeNotification {
 #warning 新创建context可能没有卵用哦
     NSLog(@"%s:%@",__PRETTY_FUNCTION__,changeNotification);
-    NSManagedObjectContext *context = [self newContext];
+    NSManagedObjectContext *context = [self getContext];
     
     [context performBlock:^{
         [context mergeChangesFromContextDidSaveNotification:changeNotification];

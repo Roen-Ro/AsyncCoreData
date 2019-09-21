@@ -104,7 +104,7 @@
     
     PlaceModel *m5 = [PlaceModel new];
     m5.name = @"F-1";
-    m5.country = @"USA";
+    m5.country = @"China";
     m5.level = 1;
     m5.zipCode = [NSString stringWithFormat:@"%@-A001",self.SubFixStr];
     

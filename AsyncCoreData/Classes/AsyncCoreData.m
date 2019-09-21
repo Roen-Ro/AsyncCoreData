@@ -103,14 +103,14 @@ static NSRecursiveLock *sWriteLock;
 {
    NSString *rootKey = entityName;
     
-    _add_cache_lock();
+  //  _add_cache_lock();
     
     NSMutableDictionary *subMap = [sDataBaseCacheMap objectForKey:rootKey];
     id retObj = nil;
     if (subMap)
         retObj = [subMap objectForKey:dbModel.objectID.URIRepresentation.absoluteString];
 
-    _remove_cache_lock();
+   // _remove_cache_lock();
     
     return retObj;
 }
@@ -178,7 +178,7 @@ static NSRecursiveLock *sWriteLock;
 
 +(nullable id)modelForStoreID:(nonnull NSManagedObjectID *)storeID {
     
-    NSManagedObjectContext *context = [self newContext];
+    NSManagedObjectContext *context = [self getContext];
     NSManagedObject *managedObj = [self DBModelForStoreID:storeID inContext:context];
     id retObj = nil;
     if(managedObj)
@@ -200,7 +200,7 @@ static NSRecursiveLock *sWriteLock;
 }
 
 +(NSError *)queryEntity:(NSString *)entityName saveModels:(nonnull NSArray<id<UniqueValueProtocol>> *)datas {
-    return [self queryEntity:entityName saveModels:datas inContext:[self newContext]];
+    return [self queryEntity:entityName saveModels:datas inContext:[self getContext]];
 }
 
 
@@ -208,7 +208,7 @@ static NSRecursiveLock *sWriteLock;
     
    [self inter_doBackgroundTask:^{
        
-        NSError *e = [self queryEntity:entityName saveModels:datas inContext:[self newContext]];
+        NSError *e = [self queryEntity:entityName saveModels:datas inContext:[self getContext]];
         main_task(^{
             if(block)
                 block(e);
@@ -309,14 +309,14 @@ static NSRecursiveLock *sWriteLock;
 
 #pragma mark- delete
 +(NSError *)queryEntity:(NSString *)entityName deleteModels:(nonnull NSArray<id<UniqueValueProtocol>> *)models {
-    return [self queryEntity:entityName deleteModels:models inContext:[self newContext]];
+    return [self queryEntity:entityName deleteModels:models inContext:[self getContext]];
 }
 
 
 +(void)queryEntity:(NSString *)entityName deleteModelsAsync:(nonnull NSArray<id<UniqueValueProtocol>> *)models completion:(void (^)(NSError *))block {
 
     [self inter_doBackgroundTask:^{
-        NSError *e = [self queryEntity:entityName deleteModels:models inContext:[self newContext]];
+        NSError *e = [self queryEntity:entityName deleteModels:models inContext:[self getContext]];
         main_task(^{
             if(block)
                 block(e);
@@ -372,12 +372,12 @@ static NSRecursiveLock *sWriteLock;
 }
 
 +(NSError *)queryEntity:(NSString *)entityName deleteModelsWithUniquevalues:(nonnull NSArray *)modelUniquevalues {
-    return [self queryEntity:entityName deleteModelsWithUniquevalues:modelUniquevalues inContext:[self newContext]];
+    return [self queryEntity:entityName deleteModelsWithUniquevalues:modelUniquevalues inContext:[self getContext]];
 }
 
 +(void)queryEntity:(NSString *)entityName deleteModelsWithUniquevaluesAsync:(nonnull NSArray *)modelUniquevalues completion:(void (^)(NSError *))block {
     [self inter_doBackgroundTask:^{
-        NSError *e = [self queryEntity:entityName deleteModelsWithUniquevalues:modelUniquevalues inContext:[self newContext]];
+        NSError *e = [self queryEntity:entityName deleteModelsWithUniquevalues:modelUniquevalues inContext:[self getContext]];
         main_task(^{
             if(block)
                 block(e);
@@ -404,13 +404,13 @@ static NSRecursiveLock *sWriteLock;
 }
 
 +(NSError *)queryEntity:(NSString *)entityName deleteModelsWithPredicate:(nullable NSPredicate *)predicate {
-    return [self queryEntity:entityName deleteModelsWithPredicate:predicate inContext:[self newContext]];
+    return [self queryEntity:entityName deleteModelsWithPredicate:predicate inContext:[self getContext]];
 }
 
 +(void)queryEntity:(NSString *)entityName deleteModelsWithPredicateAsync:(nullable NSPredicate *)predicate
                                 completion:(void (^)(NSError *))block {
     [self inter_doBackgroundTask:^{
-        NSError *e = [self queryEntity:entityName deleteModelsWithPredicate:predicate inContext:[self newContext]];
+        NSError *e = [self queryEntity:entityName deleteModelsWithPredicate:predicate inContext:[self getContext]];
         
         main_task(^{
             if(block)
@@ -439,7 +439,7 @@ static NSRecursiveLock *sWriteLock;
 updateModelsWithPredicate:(nullable NSPredicate *)predicate
              withValues:(nonnull NSArray *)values
                 forKeys:(nonnull NSArray <NSString *>*)keys {
-    return [self queryEntity:entityName updateModelsWithPredicate:predicate withValues:values forKeys:keys inContext:[self newContext]];
+    return [self queryEntity:entityName updateModelsWithPredicate:predicate withValues:values forKeys:keys inContext:[self getContext]];
 }
 
 +(void)queryEntity:(nonnull NSString *)entityName
@@ -448,7 +448,7 @@ updateModelsWithPredicateAsync:(nullable NSPredicate *)predicate
            forKeys:(nonnull NSArray <NSString *>*)keys
         completion:(void (^_Nullable)(NSError *_Nullable))block{
     [self inter_doBackgroundTask:^{
-        NSError *e = [self queryEntity:entityName updateModelsWithPredicate:predicate withValues:values forKeys:keys inContext:[self newContext]];
+        NSError *e = [self queryEntity:entityName updateModelsWithPredicate:predicate withValues:values forKeys:keys inContext:[self getContext]];
         
         main_task(^{
             if(block)
@@ -468,11 +468,19 @@ updateModelsWithPredicate:(nullable NSPredicate *)predicate
     NSError *e;
     NSArray<NSManagedObject *> *a = [self queryEntity:entityName dbModelsWithPredicate:predicate inRange:NSMakeRange(0, NSUIntegerMax) sortByKey:nil reverse:NO inContext:context];
     
+    T_ModelFromManagedObjectBlock blk = [sGettingDBValuesBlockMap objectForKey:entityName];
     NSUInteger c = MIN(values.count, keys.count);
     for(NSManagedObject *mobj in a) {
-        
+
         for(int i = 0; i<c; i++) {
             [mobj setValue:values[i] forKey:keys[i]];
+        }
+        
+        //更新缓存
+        NSObject<UniqueValueProtocol> *m = [self cachedModelForDBModel:mobj forEntity:entityName];
+        if(m) {
+            m = blk(m, mobj);
+            m.storeID = mobj.objectID;
         }
     }
     
@@ -503,7 +511,7 @@ updateModelsWithPredicate:(nullable NSPredicate *)predicate
 
 
 +(nullable NSManagedObject *)queryEntity:(NSString *)entityName existingDBModelForModel:(__kindof NSObject<UniqueValueProtocol> *)model {
-    return [self queryEntity:entityName existingDBModelForModel:model inContext:[self newContext]];
+    return [self queryEntity:entityName existingDBModelForModel:model inContext:[self getContext]];
 }
 
 
@@ -553,7 +561,7 @@ updateModelsWithPredicate:(nullable NSPredicate *)predicate
     fetchRequest.fetchLimit = range.length;
     
     NSError *error;
-    NSArray *results = [[self newContext] executeFetchRequest:fetchRequest error:&error];
+    NSArray *results = [[self getContext] executeFetchRequest:fetchRequest error:&error];
     return results;
 }
 
@@ -579,7 +587,7 @@ updateModelsWithPredicate:(nullable NSPredicate *)predicate
                         inRange:(NSRange)range
                       sortByKey:(NSString *)sortKey
                         reverse:(BOOL)reverse {
-    return [self queryEntity:entityName modelsWithPredicate:predicate inRange:range sortByKey:sortKey reverse:reverse inContext:[self newContext]];
+    return [self queryEntity:entityName modelsWithPredicate:predicate inRange:range sortByKey:sortKey reverse:reverse inContext:[self getContext]];
 }
 
 +(void)queryEntity:(NSString *)entityName modelsWithPredicateAsync:(nullable NSPredicate *)predicate
@@ -589,7 +597,7 @@ updateModelsWithPredicate:(nullable NSPredicate *)predicate
                      completion:(void (^)(NSArray *))block {
     
     [self inter_doBackgroundTask: ^{
-        NSArray *r = [self queryEntity:entityName modelsWithPredicate:predicate inRange:range sortByKey:sortKey reverse:reverse inContext:[self newContext]];
+        NSArray *r = [self queryEntity:entityName modelsWithPredicate:predicate inRange:range sortByKey:sortKey reverse:reverse inContext:[self getContext]];
         
         main_task(^{
             if(block)
@@ -695,10 +703,17 @@ updateModelsWithPredicate:(nullable NSPredicate *)predicate
     
     frqs.fetchOffset = range.location;
     frqs.fetchLimit = range.length;
+    [frqs setReturnsObjectsAsFaults:NO];
     
     NSArray *results = nil;
+    NSError *error1;
     @try {
-        results = [context executeFetchRequest:frqs error:nil];
+        results = [context executeFetchRequest:frqs error:&error1];
+        if(error1) {
+#if DEBUG
+            NSLog(@"fetch Error:%@",error1);
+#endif
+        }
     } @catch (NSException *exception) {
         NSLog(@"Exception:%@",exception);
     } @finally {
@@ -736,12 +751,12 @@ updateModelsWithPredicate:(nullable NSPredicate *)predicate
 #pragma mark- statitic/count
 
 +(NSUInteger)queryEntity:(NSString *)entityName numberOfItemsWithPredicate:(nullable NSPredicate *)predicate {
-    return [self  queryEntity:entityName numberOfItemsWithPredicate:predicate inContext:[self newContext]];
+    return [self  queryEntity:entityName numberOfItemsWithPredicate:predicate inContext:[self getContext]];
 }
 
 +(void)queryEntity:(NSString *)entityName numberOfItemsWithPredicateAsync:(nullable NSPredicate *)predicate completion:(void(^)(NSUInteger ))block {
     [self inter_doBackgroundTask:^{
-        NSUInteger c = [self queryEntity:entityName numberOfItemsWithPredicate:predicate inContext:[self newContext]];
+        NSUInteger c = [self queryEntity:entityName numberOfItemsWithPredicate:predicate inContext:[self getContext]];
         
         main_task(^{
             if(block)
@@ -780,13 +795,13 @@ numberOfItemsWithPredicate:(nullable NSPredicate *)predicate
 }
 
 +(NSNumber *)queryEntity:(NSString *)entityName valueWithFuction:(NSString *)func forKey:(NSString *)key withPredicate:(NSPredicate *)predicate {
-    return [self queryEntity:entityName valueWithFuction:func forKey:key withPredicate:predicate inContext:[self newContext]];
+    return [self queryEntity:entityName valueWithFuction:func forKey:key withPredicate:predicate inContext:[self getContext]];
 }
 
 +(void)queryEntity:(NSString *)entityName valueWithFuctionAsync:(NSString *)func forKey:(NSString *)key withPredicate:(NSPredicate *)predicate completion:(void(^)(NSNumber * ))block {
     
     [self inter_doBackgroundTask: ^{
-        NSNumber *n = [self queryEntity:entityName valueWithFuction:func forKey:key withPredicate:predicate inContext:[self newContext]];
+        NSNumber *n = [self queryEntity:entityName valueWithFuction:func forKey:key withPredicate:predicate inContext:[self getContext]];
         main_task(^{
             if(block)
                 block(n);
@@ -822,7 +837,7 @@ numberOfItemsWithPredicate:(nullable NSPredicate *)predicate
                                     withPredicate:(NSPredicate *)predicate
                                       sortKeyPath:(NSString *)sortKeyPath
                                           inRange:(NSRange)range {
-    return [self queryEntity:entityName sumValuesForKeyPathes:keyPathes groupby:groups withPredicate:predicate sortKeyPath:sortKeyPath inRange:range inContext:[self newContext]];
+    return [self queryEntity:entityName sumValuesForKeyPathes:keyPathes groupby:groups withPredicate:predicate sortKeyPath:sortKeyPath inRange:range inContext:[self getContext]];
 }
 
 +(void)queryEntity:(NSString *)entityName
@@ -833,7 +848,7 @@ sumValuesForKeyPathes:(NSArray *)keyPathes
            inRange:(NSRange)range
         completion:(void (^)(NSArray<NSDictionary *> *))block {
     [self inter_doBackgroundTask:^{
-        NSArray *r = [self queryEntity:entityName sumValuesForKeyPathes:keyPathes groupby:groups withPredicate:predicate sortKeyPath:sortKeyPath inRange:range inContext:[self newContext]];
+        NSArray *r = [self queryEntity:entityName sumValuesForKeyPathes:keyPathes groupby:groups withPredicate:predicate sortKeyPath:sortKeyPath inRange:range inContext:[self getContext]];
         main_task(^{
             if(block)
                 block(r);

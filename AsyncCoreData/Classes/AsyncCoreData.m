@@ -158,8 +158,13 @@ static NSRecursiveLock *sWriteLock;
     
     if (BG_USE_SAME_RUNLOOP_)
         [sBgNSRunloop performBlock:task];
-    else
-        background_async(task);
+    else{
+        
+        if([self useSharedMainContext])
+            main_task(task);
+        else
+            background_async(task);
+    }
 }
 
 #pragma mark- insert/update

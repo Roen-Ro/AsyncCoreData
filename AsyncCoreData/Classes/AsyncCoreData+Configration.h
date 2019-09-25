@@ -35,7 +35,7 @@ typedef __kindof NSObject  * _Nonnull  (^T_ModelFromManagedObjectBlock)(__kindof
                 withModel:(nonnull NSString *)modelName
                completion:(void(^ _Nonnull )(void))mainThreadBlock;
 
-#warning 注意，如果这里设置了icloudStoreName参数iName的值，那么所有的 \
+#warning 注意，如果这里设置了icloudStoreName参数iName的值不为nil，那么所有的 \
 +[AsyncCoreData queryEntity:(NSString *)entityName xxx:] 类方法只能在主线程调用 \
 +[AsyncCoreData queryEntity:(NSString *)entityName xxxAsync:... completion:^(xxx){ xxx }]; 类异步方法暂时不要使用\
 
@@ -78,6 +78,8 @@ typedef __kindof NSObject  * _Nonnull  (^T_ModelFromManagedObjectBlock)(__kindof
 
 +(nonnull NSManagedObjectContext *)newContext; //在当前线程创建一个新的context
 +(nonnull NSManagedObjectContext *)getContext; //根据当前条件返回合适的context
+
++(BOOL)useSharedMainContext;
 
 @end
 

@@ -64,7 +64,7 @@
     
     self.SubFixStr = [self.segControl titleForSegmentAtIndex:self.segControl.selectedSegmentIndex];
     
-    [AsyncCoreData setPersistantStore:dataBaseFileUrl withModel:@"RRCDModel" icloudStoreName:self.SubFixStr completion:^{
+    [AsyncCoreData setPersistantStore:dataBaseFileUrl withModel:@"RRCDModel" icloudStoreName:nil completion:^{
         NSLog(@"Data Base changed to %@",name);
 
     }];
@@ -118,10 +118,10 @@
     m7.name = @"F-7";
     m7.country = @"USA";
     m7.level = 2;
-    m7.zipCode =  m3.zipCode = [NSString stringWithFormat:@"%@-C007",self.SubFixStr];
+    m7.zipCode =  [NSString stringWithFormat:@"%@-C007",self.SubFixStr];
     
-    self.tmpCacheSpecialModels = @[m1,m6];
-    return @[m1,m2,m3,m4,m5,m6,m7];
+    self.tmpCacheSpecialModels = @[m1,m4];
+    return @[m1,m2,m3,m4,m5,m7];
 }
 
 - (IBAction)writeData:(id)sender {
@@ -154,7 +154,7 @@
 }
 - (IBAction)readDataCustom:(UIButton *)sender {
     
-    NSArray *list = [DB_PLACE keyPathes:@[@"name", @"country"] groupby:@[@"name", @"country"] withPredicate:nil sortKeyPath:@"country" inRange:NSMakeRange(0, NSUIntegerMax) reverse:false];
+    NSArray *list = [DB_PLACE keyPathes:@[@"name", @"country"] groupby:@[@"name", @"country"] withPredicate:nil sortKeyPath:@"level" inRange:NSMakeRange(0, NSUIntegerMax) reverse:false];
     NSLog(@"readDataCustom: %@", list);
 }
 
@@ -259,6 +259,11 @@
     results =  [DB_PLACE modelsWithPredicate:nil inRange:NSMakeRange(0, 999) sortByKey:nil reverse:YES];
     NSLog(@"-----AFTER DELETE %@-----",specialZip);
     NSLog(@"%zu MODELS:%@",results.count,results);
+
+//    [DB_PLACE deleteModelsWithPredicate:[NSPredicate predicateWithFormat:@"zipCode == nil"]];
+//    results =  [DB_PLACE modelsWithPredicate:nil inRange:NSMakeRange(0, 999) sortByKey:nil reverse:YES];
+//    NSLog(@"-----AFTER DELETE zip null (predicate)-----");
+//    NSLog(@"%zu MODELS:%@",results.count,results);
     
     NSString *specialContry  = @"FINNA";
     [DB_PLACE deleteModelsWithPredicate:[NSPredicate predicateWithFormat:@"country = %@",specialContry]];

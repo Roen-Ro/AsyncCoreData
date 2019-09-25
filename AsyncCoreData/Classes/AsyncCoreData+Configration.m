@@ -18,6 +18,7 @@ extern NSRunLoop *sBgNSRunloop;
 
 static NSMutableDictionary *iCloudEnabledClassMap;
 static NSMutableDictionary *sharedMainContextMap;
+static NSMutableDictionary *sharedRunLoopMap;
 
 @implementation AsyncCoreData (Configration)
 
@@ -56,8 +57,6 @@ static NSMutableDictionary *sharedMainContextMap;
  //因为NSPersistentStoreCoordinatorStoresWillChangeNotification会在addPersistentStoreWithType时候触发，所以这里保存persistantStoreCord要在addPersistentStoreWithType 之前
             [sPersistantStoreMap setObject:persistantStoreCord forKey:key];
             
-           
-           // [sPersistantStoreMap setObject:persistantStoreCord forKey:key];
         }
         
         NSString *classIndependentKey = NSStringFromClass([self class]);
@@ -142,6 +141,9 @@ static NSMutableDictionary *sharedMainContextMap;
 +(void)invalidatePersistantSotre {
     NSString *key = NSStringFromClass([self class]);
     [sPersistantStoreClassMap removeObjectForKey:key];
+    
+    //清除之前的共享context
+    [sharedMainContextMap removeObjectForKey:NSStringFromClass([self class])];
 }
 
 
@@ -186,10 +188,12 @@ static NSMutableDictionary *sharedMainContextMap;
 
 +(NSManagedObjectContext *)getContext {
 
+    NSManagedObjectContext *ctx = nil;
     if([self useSharedMainContext])
-        return [self sharedMainContext];
+        ctx = [self sharedMainContext];
     else
-        return [self newContext];
+        ctx = [self newContext];
+    return ctx;
 }
 
 +(NSManagedObjectContext *)newContext {
@@ -226,7 +230,6 @@ static NSMutableDictionary *sharedMainContextMap;
 
 +(void)storesDidChange:(NSNotification *)notification {
     NSLog(@"%s:%@",__PRETTY_FUNCTION__,notification);
-#warning 新创建context可能没有卵用哦
     NSManagedObjectContext *context = [self getContext];
     
     [context performBlockAndWait:^{
@@ -246,7 +249,6 @@ static NSMutableDictionary *sharedMainContextMap;
 }
 
 +(void)persistentStoreDidImportUbiquitousContentChanges:(NSNotification *)changeNotification {
-#warning 新创建context可能没有卵用哦
     NSLog(@"%s:%@",__PRETTY_FUNCTION__,changeNotification);
     NSManagedObjectContext *context = [self getContext];
     

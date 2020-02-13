@@ -22,10 +22,11 @@
 ```
 
 ### 配置
-注：这部分可以移除不用，xcode7以后可以在xcdatamodel中设置entity的constraints,代码已经支持，readme还为更新过来
 
+ 1  **数据模型实现`UniqueValueProtocol`的协议方法** 
+ 
+ 注：这部分可以移除不用，xcode7以后可以在xcdatamodel中设置entity的constraints,代码已经支持，readme还未更新过来
 
- 1  **数据模型实现`UniqueValueProtocol`的协议方法**
 ```objc
 //PlaceModel.m
 -(id)uniqueValue {

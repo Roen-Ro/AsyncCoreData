@@ -27,7 +27,7 @@
 
 @end
 
- NSMutableDictionary *sDataBaseCacheMap;
+ NSMutableDictionary<NSString *, NSCache *> *sDataBaseCacheMap;
  NSMapTable *sPersistantStoreMap;
  NSMutableDictionary *sPersistantStoreClassMap;
 
@@ -66,10 +66,10 @@ static NSRecursiveLock *sWriteLock;
             
         });
     }
-#if TARGET_OS_IPHONE
-    [[NSNotificationCenter defaultCenter]addObserver:self
-                                            selector:@selector(clearUnNessesaryCachedData)
-                                                name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
+#if TARGET_OS_IPHONE 
+//    [[NSNotificationCenter defaultCenter]addObserver:self
+//                                            selector:@selector(clearUnNessesaryCachedData)
+//                                                name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
 #endif
 }
 
@@ -82,20 +82,20 @@ static NSRecursiveLock *sWriteLock;
     if(!obj)
         return;
     
-    _add_cache_lock();
-    
     NSString *rootKey = entityName;
-    NSMutableDictionary *subMap = [sDataBaseCacheMap objectForKey:rootKey];
+    NSCache *subMap = [sDataBaseCacheMap objectForKey:rootKey];
     if(!subMap)
     {
-        subMap = [NSMutableDictionary dictionaryWithCapacity:200];
+        subMap = [NSCache new];
+        _add_cache_lock();
         [sDataBaseCacheMap setObject:subMap forKey:rootKey];
+        _remove_cache_lock();
     }
     
     if(obj && obj.storeID)
         [subMap setObject:obj forKey:obj.storeID.URIRepresentation.absoluteString];
     
-    _remove_cache_lock();
+
 }
 
 
@@ -103,53 +103,47 @@ static NSRecursiveLock *sWriteLock;
 {
    NSString *rootKey = entityName;
     
-  //  _add_cache_lock();
-    
-    NSMutableDictionary *subMap = [sDataBaseCacheMap objectForKey:rootKey];
+    NSCache *subMap = [sDataBaseCacheMap objectForKey:rootKey];
     id retObj = nil;
     if (subMap)
         retObj = [subMap objectForKey:dbModel.objectID.URIRepresentation.absoluteString];
 
-   // _remove_cache_lock();
-    
     return retObj;
 }
 
 +(void)removeCachedModelForDBModel:(nonnull NSManagedObject *)dbModel forEntity:(NSString *)entityName
 {
     NSString *rootKey = entityName;
-    _add_cache_lock();
-    NSMutableDictionary *subMap = [sDataBaseCacheMap objectForKey:rootKey];
+    NSCache *subMap = [sDataBaseCacheMap objectForKey:rootKey];
     if (subMap)
         [subMap removeObjectForKey:dbModel.objectID.URIRepresentation.absoluteString];
-    _remove_cache_lock();
 }
 
 
-+(void)clearUnNessesaryCachedData
-{
-    _add_cache_lock();
-
-    [sDataBaseCacheMap enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-        
-        NSMutableDictionary *subMap = (NSMutableDictionary *)obj;
-        
-        NSMutableArray *mKeysToRemove = [NSMutableArray arrayWithCapacity:subMap.count];
-        
-        [subMap enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-
-            CFIndex retainCount = CFGetRetainCount((__bridge CFTypeRef)obj);
-            if(retainCount <= 2) //因为除了dictionary持有obj外，block的形参也持有了obj，所以小于等于2即表示没有其他地方持有了obj
-            {
-                [mKeysToRemove addObject:key];
-            }
-        }];
-        
-        [subMap removeObjectsForKeys:mKeysToRemove];
-    }];
-
-    _remove_cache_lock();
-}
+//+(void)clearUnNessesaryCachedData
+//{
+//    _add_cache_lock();
+//
+//    [sDataBaseCacheMap enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+//        
+//        NSMutableDictionary *subMap = (NSMutableDictionary *)obj;
+//        
+//        NSMutableArray *mKeysToRemove = [NSMutableArray arrayWithCapacity:subMap.count];
+//        
+//        [subMap enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+//
+//            CFIndex retainCount = CFGetRetainCount((__bridge CFTypeRef)obj);
+//            if(retainCount <= 2) //因为除了dictionary持有obj外，block的形参也持有了obj，所以小于等于2即表示没有其他地方持有了obj
+//            {
+//                [mKeysToRemove addObject:key];
+//            }
+//        }];
+//        
+//        [subMap removeObjectsForKeys:mKeysToRemove];
+//    }];
+//
+//    _remove_cache_lock();
+//}
 
 #pragma mark-
 

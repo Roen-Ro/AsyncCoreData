@@ -7,7 +7,7 @@
 
 #import "AsyncCoreData+Configration.h"
 
-extern NSMutableDictionary *sDataBaseCacheMap;
+extern NSMutableDictionary<NSString *, NSCache *> *sDataBaseCacheMap;
 extern NSMapTable *sPersistantStoreMap;
 extern NSMutableDictionary *sPersistantStoreClassMap;
 

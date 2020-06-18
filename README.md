@@ -1,7 +1,8 @@
 # AsyncCoreData
 
 - 对CoreData数据库支持同步/异步操作
-- 自带内存缓存，保证同一数据在内存中的唯一性
+- 保证同一数据在内存中的唯一性，节省内存空间，利于保持数据同步
+- 自带缓存，大大提升数据读取速度
 - 线程安全
 - 灵活的接口封装
 
@@ -25,7 +26,7 @@
 
  1  **数据模型实现`UniqueValueProtocol`的协议方法** 
  
- 注：这部分可以移除不用，xcode7以后可以在xcdatamodel中设置entity的constraints,代码已经支持，readme还未更新过来
+ >注：xcode7以后可以在xcdatamodel中设置entity的constraints,如果你是通过Xcode中设置Entity的Constraint，可以跳过此部分内容，所有存储的数据模型也可以不必遵守`UniqueValueProtocol`协议
 
 ```objc
 //PlaceModel.m
@@ -44,7 +45,9 @@
 - *每一个Entity必须要有一个String类型的 `uniqueID` 字段，这个字段就好比是mysql数据库中的唯一索引，不同的是这个字段可以为`nil`*  
 - *在CoreData数据库中，`uniqueID` 字段值将“自动”设定为模型中的`uniqueValue`值（即为何要遵循`UniqueValueProtocol`协议方法规范)*  
 - *在进行数据写入的时候，`AsyncCoreData` 将会自动检查数据模型的`uniqueValue`值（在不为`nil`的情况下）对应的记录在数据库中是否存在，若存在则更新该记录，否则则插入一条新记录*
+- *为了加快查询速度，建议对`uniqueID`添加索引，添加方法为1)选中`Entity`,鼠标长按Xcode下面的”Add Entity“加号按钮，然后选中Add Fetch Indexes*
 </font>  
+
 
 
 3 **配置数据库存储位置及数据模型来源文件**  

@@ -224,35 +224,38 @@ static NSRecursiveLock *sWriteLock;
     NSMutableArray *modelArray_, *dbArray_;
     NSError *retError;
     
-    //为了兼容老版本，本来直接在xcode中设置entity的constraints就可以了
+    
     BOOL usePredicateToFiltUniqueness = YES;
     NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:context];
-    if(entity.uniquenessConstraints.count > 0) {
-        entity.uniquenessConstraints = @[@[@"uniqueID"]];
-    }
     
-    for(NSArray *a in entity.uniquenessConstraints) {
-        for(id key in a) {
-            if([key isKindOfClass:[NSString class]]) {
-                if([key isEqualToString:@"uniqueID"]) {
-                    usePredicateToFiltUniqueness = NO;
-                    break;
-                }
-            }
-            else if([key isKindOfClass:[NSAttributeDescription class]]) {
-                NSAttributeDescription *k = (NSAttributeDescription *)key;
-                if([k.name isEqualToString:@"uniqueID"]) {
-                    usePredicateToFiltUniqueness = NO;
-                    break;
-                }
-            }
-        }
-        
-        if( !usePredicateToFiltUniqueness)
-            break;
-    }
-    if(!usePredicateToFiltUniqueness)
-        context.mergePolicy = [[NSMergePolicy alloc] initWithMergeType:NSMergeByPropertyObjectTrumpMergePolicyType];
+//2020.09.29 commentted,
+//为了兼容老版本，本来直接在xcode中设置entity的constraints就可以了
+//    if(entity.uniquenessConstraints.count > 0) {
+//        entity.uniquenessConstraints = @[@[@"uniqueID"]];
+//    }
+//
+//    for(NSArray *a in entity.uniquenessConstraints) {
+//        for(id key in a) {
+//            if([key isKindOfClass:[NSString class]]) {
+//                if([key isEqualToString:@"uniqueID"]) {
+//                    usePredicateToFiltUniqueness = NO;
+//                    break;
+//                }
+//            }
+//            else if([key isKindOfClass:[NSAttributeDescription class]]) {
+//                NSAttributeDescription *k = (NSAttributeDescription *)key;
+//                if([k.name isEqualToString:@"uniqueID"]) {
+//                    usePredicateToFiltUniqueness = NO;
+//                    break;
+//                }
+//            }
+//        }
+//
+//        if( !usePredicateToFiltUniqueness)
+//            break;
+//    }
+//    if(!usePredicateToFiltUniqueness)
+//        context.mergePolicy = [[NSMergePolicy alloc] initWithMergeType:NSMergeByPropertyObjectTrumpMergePolicyType];
     
     _add_write_lock();
         
@@ -288,9 +291,9 @@ static NSRecursiveLock *sWriteLock;
         }
     }
     
-    [context save:&retError];
+    BOOL r = [context save:&retError];
     
-    if(modelArray_.count > 0) {
+    if(r && modelArray_.count > 0) {
         NSInteger i = 0;
         for(;i<modelArray_.count;i++) {
             

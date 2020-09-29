@@ -26,7 +26,7 @@
 
  1  **数据模型实现`UniqueValueProtocol`的协议方法** 
  
- >注：xcode7以后可以在xcdatamodel中设置entity的constraints,如果你是通过Xcode中设置Entity的Constraint，可以跳过此部分内容，所有存储的数据模型也可以不必遵守`UniqueValueProtocol`协议
+ >注：虽然xcode7以后可以在xcdatamodel中设置entity的constraints,但还是要遵守`UniqueValueProtocol`协议, 调试发现即使约束相同，覆盖了原数据，`NSManagedObjectContext`会有缓存,导致会有一条新的数据在缓存中
 
 ```objc
 //PlaceModel.m

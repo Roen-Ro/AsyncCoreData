@@ -11,7 +11,7 @@
 
 @protocol UniqueValueProtocol;
 
-@interface PlaceModel : NSObject<UniqueValueProtocol>
+@interface PlaceModel : NSObject<NSCopying, UniqueValueProtocol>
 
 @property (nonatomic, strong) NSString *name;
 @property (nonatomic, strong) NSString *country;

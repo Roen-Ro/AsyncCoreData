@@ -272,7 +272,41 @@
     NSLog(@"%zu MODELS:%@",results.count,results);
 }
 
-
+- (IBAction)testConstraints:(id)sender  {
+    
+    PlaceModel *m = [PlaceModel new];
+    m.name = @"ShengZhen";
+    m.country = @"China";
+    m.level = 1;
+    m.zipCode = @"518000";
+    NSError *e = [DB_PLACE saveModels:@[m]];
+    NSLog(@"1------- saveError:%@",e);
+    NSLog(@"A> m.storeID:%@",m.storeID);
+    NSManagedObjectContext *ctx = [AsyncCoreData newContext];
+    NSArray *dbs = [DB_PLACE dbModelsWithPredicate:nil inRange:NSMakeRange(0, 999) sortByKey:nil reverse:nil inContext:ctx];
+    for(NSManagedObject *o in dbs) {
+        NSLog(@"o-1:%@",o);
+    }
+    
+    PlaceModel *mcopy = [m copy];
+    mcopy.name = @"BaoAn";
+    mcopy.country = @"GuangDong";
+    [DB_PLACE saveModels:@[mcopy]];
+    NSLog(@"2------- saveError:%@",e);
+    NSLog(@"B> mcopy.storeID:%@",mcopy.storeID);
+    NSArray *dbs1 = [DB_PLACE dbModelsWithPredicate:nil inRange:NSMakeRange(0, 999) sortByKey:nil reverse:nil inContext:[AsyncCoreData newContext]];
+    
+    for(NSManagedObject *o in dbs1) {
+        NSLog(@"o-2:%@",o);
+    }
+    NSLog(@"=========================");
+    NSManagedObject *o1 = [AsyncCoreData DBModelForStoreID:m.storeID inContext:[AsyncCoreData newContext]];
+    NSLog(@"o1:%@",o1);
+    NSManagedObject *o2 = [AsyncCoreData DBModelForStoreID:mcopy.storeID inContext:[AsyncCoreData newContext]];
+    NSLog(@"o2:%@",o2);
+    
+    
+}
 
 -(IBAction)clearAllData:(id)btn {
     

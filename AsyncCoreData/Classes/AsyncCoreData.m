@@ -271,6 +271,7 @@ static NSRecursiveLock *sWriteLock;
         if(DBm) {
             
             T_ModelToManagedObjectBlock blk = [sSettingDBValuesBlockMap objectForKey:entityName];
+            [DBm setValue:m.uniqueValue forKey:@"uniqueID"];
             NSAssert(blk, @"model's mapper block hasn't set for entity %@, Use +[AsyncCoreData setModelToDataBaseMapper:forEntity:] method to setup",entityName);
             blk(m, DBm);
 
@@ -393,6 +394,7 @@ static NSRecursiveLock *sWriteLock;
     NSError *e;
     for(id v in modelUniquevalues) {
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"uniqueID = %@",v];
+        
 #warning todo 为了节省内容，采取分批获取进行优化
         NSArray<NSManagedObject *> *a = [self queryEntity:entityName dbModelsWithPredicate:predicate inRange:NSMakeRange(0, NSUIntegerMax) sortByKey:nil reverse:NO inContext:context];
         for(NSManagedObject *mobj in a) {

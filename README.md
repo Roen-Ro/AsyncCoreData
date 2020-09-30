@@ -87,10 +87,11 @@ NSURL *url = [publicDataDirectory URLByAppendingPathComponent:@"AppDataBase.sqli
 ```objc
 //模型数据写入数据库配置方法
 [AsyncCoreData setModelToDataBaseMapper:^(PlaceModel * model, NSManagedObject * _Nonnull managedObject) {
-    [managedObject setValue:model.zipCode forKey:@"uniqueID"];
-    [managedObject setValue:model.name forKey:@"name"];
-    [managedObject setValue:model.country forKey:@"country"];
-    [managedObject setValue:@(model.level) forKey:@"level"];
+    // [managedObject setValue:model.uniqueValue forKey:@"uniqueID"]; //AsyncCoreData 自动设定
+     [managedObject setValue:model.zipCode forKey:@"zip"];
+     [managedObject setValue:model.uniqueValue forKey:@"name"];
+     [managedObject setValue:model.country forKey:@"country"];
+     [managedObject setValue:@(model.level) forKey:@"level"];
 
 } forEntity:@"PlaceEntity"];
 
@@ -99,10 +100,11 @@ NSURL *url = [publicDataDirectory URLByAppendingPathComponent:@"AppDataBase.sqli
 
     if(!model)//注意这里如果外部没有传入数据模型的话，要负责创建
         model = [PlaceModel new];
-    model.zipCode = [managedObject valueForKey:@"uniqueID"];
-    model.name = [managedObject valueForKey:@"name"];
-    model.country = [managedObject valueForKey:@"country"];
-    model.level = [[managedObject valueForKey:@"level"] intValue];
+    // model.uniqueValue = [managedObject valueForKey:@"uniqueID"];//不需要
+     model.zipCode = [managedObject valueForKey:@"zip"];
+     model.name = [managedObject valueForKey:@"name"];
+     model.country = [managedObject valueForKey:@"country"];
+     model.level = [[managedObject valueForKey:@"level"] intValue];
 
     return model;
 

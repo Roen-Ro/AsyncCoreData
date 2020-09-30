@@ -4,7 +4,8 @@
         <attribute name="country" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="level" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="uniqueID" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
+        <attribute name="uniqueID" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="zip" optional="YES" attributeType="String" indexed="YES" syncable="YES"/>
         <uniquenessConstraints>
             <uniquenessConstraint>
                 <constraint value="uniqueID"/>
@@ -12,6 +13,6 @@
         </uniquenessConstraints>
     </entity>
     <elements>
-        <element name="PlaceEntity" positionX="-63" positionY="-18" width="128" height="103"/>
+        <element name="PlaceEntity" positionX="-63" positionY="-18" width="128" height="118"/>
     </elements>
 </model>

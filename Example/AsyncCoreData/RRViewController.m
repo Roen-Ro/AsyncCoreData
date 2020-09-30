@@ -38,8 +38,9 @@
 
 -(void)initialDataMap {
     [AsyncCoreData setModelToDataBaseMapper:^(PlaceModel * model, NSManagedObject * _Nonnull managedObject) {
-        [managedObject setValue:model.zipCode forKey:@"uniqueID"];
-        [managedObject setValue:model.name forKey:@"name"];
+       // [managedObject setValue:model.uniqueValue forKey:@"uniqueID"]; //AsyncCoreData 自动设定
+        [managedObject setValue:model.zipCode forKey:@"zip"];
+        [managedObject setValue:model.uniqueValue forKey:@"name"];
         [managedObject setValue:model.country forKey:@"country"];
         [managedObject setValue:@(model.level) forKey:@"level"];
     } forEntity:PLACE_ENTITY];
@@ -47,7 +48,8 @@
     [AsyncCoreData setModelFromDataBaseMapper:^__kindof NSObject * _Nonnull(PlaceModel * _Nullable model, NSManagedObject * _Nonnull managedObject) {
         if(!model)
             model = [PlaceModel new];
-        model.zipCode = [managedObject valueForKey:@"uniqueID"];
+       // model.uniqueValue = [managedObject valueForKey:@"uniqueID"];//不需要
+        model.zipCode = [managedObject valueForKey:@"zip"];
         model.name = [managedObject valueForKey:@"name"];
         model.country = [managedObject valueForKey:@"country"];
         model.level = [[managedObject valueForKey:@"level"] intValue];

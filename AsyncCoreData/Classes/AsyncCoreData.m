@@ -9,7 +9,7 @@
 #import "AsyncCoreData.h"
 #import <objc/runtime.h>
 
-
+extern NSMutableSet *disabledCacheEntities;
 
 @implementation NSObject (AsyncCoreData)
 
@@ -79,7 +79,7 @@ static NSRecursiveLock *sWriteLock;
 //注意dbObj参数必须是已经保存到数据库中的数据 即dbObj的objectID.isTemporaryID = NO
 +(void)cacheModel:(NSObject *)obj forEntity:(NSString *)entityName
 {
-    if(!obj)
+    if(!obj || [disabledCacheEntities containsObject:entityName])
         return;
     
     NSString *rootKey = entityName;
@@ -300,7 +300,7 @@ static NSRecursiveLock *sWriteLock;
             NSManagedObject *DBm1 = [dbArray_ objectAtIndex:i];
             NSObject *m1 = [modelArray_ objectAtIndex:i];
             m1.storeID = DBm1.objectID;
-            //对新插入的元素进行cacke
+            //对新插入的元素进行cache
             [self cacheModel:m1 forEntity:entityName];
         }
     }

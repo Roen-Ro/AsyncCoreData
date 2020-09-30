@@ -20,6 +20,9 @@ static NSMutableDictionary *iCloudEnabledClassMap;
 static NSMutableDictionary *sharedMainContextMap;
 static NSMutableDictionary *sharedRunLoopMap;
 
+NSMutableSet *disabledCacheEntities;
+
+
 @implementation AsyncCoreData (Configration)
 
 +(void)setPersistantStore:(nullable NSURL *)persistantFileUrl withModel:(nonnull NSString *)modelName completion:(void(^)(void))mainThreadBlock {
@@ -204,6 +207,20 @@ static NSMutableDictionary *sharedRunLoopMap;
 
 }
 
++(void)addDisableModelCacheForEnity:(nonnull NSString *)entityName {
+    if(!disabledCacheEntities)
+        disabledCacheEntities = [NSMutableSet setWithCapacity:8];
+    [disabledCacheEntities addObject:entityName];
+    
+    NSCache *subMap = [sDataBaseCacheMap objectForKey:entityName];
+    [subMap removeAllObjects];
+    [sDataBaseCacheMap removeObjectForKey:entityName];
+}
+
++(nullable NSSet *)disabledModelCahceEntities {
+    return [disabledCacheEntities copy];
+}
+
 #pragma mark- icloud
 + (void)registerForiCloudNotificationsForPersistentCoordinator:(NSPersistentStoreCoordinator *)persistentStoreCoordinator {
     NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
@@ -225,11 +242,15 @@ static NSMutableDictionary *sharedRunLoopMap;
 }
 
 +(void)storesWillChange:(NSNotification *)notification {
+#if DEBUG
     NSLog(@"%s:%@",__PRETTY_FUNCTION__,notification);
+#endif
 }
 
 +(void)storesDidChange:(NSNotification *)notification {
+#if DEBUG
     NSLog(@"%s:%@",__PRETTY_FUNCTION__,notification);
+#endif
     NSManagedObjectContext *context = [self getContext];
     
     [context performBlockAndWait:^{
@@ -249,13 +270,17 @@ static NSMutableDictionary *sharedRunLoopMap;
 }
 
 +(void)persistentStoreDidImportUbiquitousContentChanges:(NSNotification *)changeNotification {
+#if DEBUG
     NSLog(@"%s:%@",__PRETTY_FUNCTION__,changeNotification);
+#endif
     NSManagedObjectContext *context = [self getContext];
     
     [context performBlock:^{
         [context mergeChangesFromContextDidSaveNotification:changeNotification];
     }];
 }
+
+
 
 @end
 

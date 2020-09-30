@@ -73,6 +73,10 @@ typedef __kindof NSObject  * _Nonnull  (^T_ModelFromManagedObjectBlock)(__kindof
 +(void)setModelToDataBaseMapper:(nonnull T_ModelToManagedObjectBlock)mapper forEntity:(nonnull NSString *)entityName;//非线程安全
 +(void)setModelFromDataBaseMapper:(nonnull T_ModelFromManagedObjectBlock)mapper forEntity:(nonnull NSString *)entityName; //非线程安全
 
+//如果有些表的数据不需要缓存模型（比如词汇表），通过这方法来设置
++(void)addDisableModelCacheForEnity:(nonnull NSString *)entityName;
++(nullable NSSet *)disabledModelCahceEntities;
+
 +(nullable NSPersistentStoreCoordinator *)persistentStoreCoordinator;
 +(void)invalidatePersistantSotre;//一般不会用到，测试的时候用
 

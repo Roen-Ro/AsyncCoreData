@@ -258,6 +258,8 @@ static NSRecursiveLock *sWriteLock;
 //        context.mergePolicy = [[NSMergePolicy alloc] initWithMergeType:NSMergeByPropertyObjectTrumpMergePolicyType];
     
     _add_write_lock();
+    
+    BOOL hasUniqueIdProperty = [entity.attributesByName.allKeys containsObject:@"uniqueID"];
         
     for(NSObject<UniqueValueProtocol> *m in dCopy) {
         
@@ -271,7 +273,9 @@ static NSRecursiveLock *sWriteLock;
         if(DBm) {
             
             T_ModelToManagedObjectBlock blk = [sSettingDBValuesBlockMap objectForKey:entityName];
-            [DBm setValue:m.uniqueValue forKey:@"uniqueID"];
+            if(hasUniqueIdProperty)
+                [DBm setValue:m.uniqueValue forKey:@"uniqueID"];
+            
             NSAssert(blk, @"model's mapper block hasn't set for entity %@, Use +[AsyncCoreData setModelToDataBaseMapper:forEntity:] method to setup",entityName);
             blk(m, DBm);
 

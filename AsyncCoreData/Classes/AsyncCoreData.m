@@ -79,6 +79,7 @@ static NSRecursiveLock *sWriteLock;
 //注意dbObj参数必须是已经保存到数据库中的数据 即dbObj的objectID.isTemporaryID = NO
 +(void)cacheModel:(NSObject *)obj forEntity:(NSString *)entityName
 {
+    //obj为nil的话storeID也找不到，所以干脆就不处理
     if(!obj || [disabledCacheEntities containsObject:entityName])
         return;
     
@@ -221,7 +222,7 @@ static NSRecursiveLock *sWriteLock;
             inContext:(NSManagedObjectContext *)context
 {
     NSArray *dCopy = [NSArray arrayWithArray:datas];
-    NSMutableArray *modelArray_, *dbArray_;
+    NSMutableArray *modelArray_, *dbArray_; //用来存放新插入的元素，更新的元素不会加入
     NSError *retError;
     
     
@@ -278,13 +279,9 @@ static NSRecursiveLock *sWriteLock;
             
             NSAssert(blk, @"model's mapper block hasn't set for entity %@, Use +[AsyncCoreData setModelToDataBaseMapper:forEntity:] method to setup",entityName);
             blk(m, DBm);
-
-            //   [self cacheObject:m forManagedObject:DBm]; //cacke比较复杂 如果是更新操作的话，之前的步骤会保证cacke，如果是插入操作的话，到后面再cacke
             
-            if(!DBm.objectID.isTemporaryID) {
-                m.storeID = DBm.objectID;
-            }
-            else {
+            if(DBm.objectID.isTemporaryID) { //新插入的元素， 保存完后在更新cache
+                
                 if(!modelArray_) {
                     modelArray_ = [NSMutableArray arrayWithCapacity:datas.count];
                     dbArray_ = [NSMutableArray arrayWithCapacity:datas.count];
@@ -292,6 +289,14 @@ static NSRecursiveLock *sWriteLock;
                 
                 [modelArray_ addObject:m];
                 [dbArray_ addObject:DBm];
+            }
+            else { //更新操作的元素，直接更新cache
+                //没必要多此一举吧？
+                m.storeID = DBm.objectID;
+                NSObject<UniqueValueProtocol> *preModel = [self cachedModelForDBModel:DBm forEntity:entityName];
+                if(preModel != m)
+                    [self cacheModel:m forEntity:entityName];
+                
             }
         }
     }

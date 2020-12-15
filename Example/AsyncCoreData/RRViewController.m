@@ -8,6 +8,7 @@
 
 #import "RRViewController.h"
 #import <AsyncCoreData/AsyncCoreData.h>
+#import <AsyncCoreData/AycDataTransfer.h>
 #import "PlaceModel.h"
 
 #define PLACE_ENTITY @"PlaceEntity"
@@ -36,6 +37,13 @@
     
 }
 
+-(NSURL *)DataBaseFileForSegmentIndex:(NSUInteger)index {
+    NSString *t = [self.segControl titleForSegmentAtIndex:index];
+    NSURL *docUrl = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
+    NSURL *fileUrl = [docUrl URLByAppendingPathComponent:[NSString stringWithFormat:@"%@.sqlite",t]];
+    return fileUrl;
+}
+
 -(void)initialDataMap {
     [AsyncCoreData setModelToDataBaseMapper:^(PlaceModel * model, NSManagedObject * _Nonnull managedObject) {
        // [managedObject setValue:model.uniqueValue forKey:@"uniqueID"]; //AsyncCoreData 自动设定
@@ -60,16 +68,28 @@
 
 - (IBAction)dataStoreChange:(UISegmentedControl *)sender {
     
-    NSString *name = [sender titleForSegmentAtIndex:sender.selectedSegmentIndex];
-    NSURL *docUrl = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
-    NSURL *dataBaseFileUrl = [docUrl URLByAppendingPathComponent:[NSString stringWithFormat:@"%@.sqlite",name]];
-    
+    NSURL *dataBaseFileUrl = [self DataBaseFileForSegmentIndex:sender.selectedSegmentIndex];
     self.SubFixStr = [self.segControl titleForSegmentAtIndex:self.segControl.selectedSegmentIndex];
     
     [AsyncCoreData setPersistantStore:dataBaseFileUrl withModel:@"RRCDModel" icloudStoreName:nil completion:^{
-        NSLog(@"Data Base changed to %@",name);
+        NSLog(@"Data Base changed to %@",dataBaseFileUrl.lastPathComponent);
 
     }];
+}
+
+-(IBAction)moveDataBase:(UIButton *)sender {
+    
+    NSURL *curentURL = [self DataBaseFileForSegmentIndex:self.segControl.selectedSegmentIndex];
+    NSUInteger idx = self.segControl.selectedSegmentIndex + 1;
+    if(idx >= self.segControl.numberOfSegments ) {
+        idx = 0;
+    }
+    NSURL *destURL = [self DataBaseFileForSegmentIndex:idx];
+    
+    NSError *e;
+    [AycDataTransfer copyDataOfModel:@"RRCDModel" from:curentURL to:destURL error:&e];
+    NSLog(@"Copy error: %@",e);
+    
 }
 
 -(IBAction)changeToCurrentStore:(id)sender {

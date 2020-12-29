@@ -31,14 +31,23 @@ typedef __kindof NSObject  * _Nonnull  (^T_ModelFromManagedObjectBlock)(__kindof
   https://developer.apple.com/library/archive/documentation/DataManagement/Conceptual/UsingCoreDataWithiCloudPG/Introduction/Introduction.html )
  如果不设置MyMessageManager的话，那么MyMessageManager默认使用AsyncCoreData的设置
  */
+//同步
++(void)setPersistantStore:(nullable NSURL *)persistantFileUrl
+                withModel:(nonnull NSString *)modelName;
+
+//异步
 +(void)setPersistantStore:(nullable NSURL *)persistantFileUrl
                 withModel:(nonnull NSString *)modelName
                completion:(void(^ _Nonnull )(void))mainThreadBlock;
 
 #warning 注意，如果这里设置了icloudStoreName参数iName的值不为nil，那么所有的 \
 +[AsyncCoreData queryEntity:(NSString *)entityName xxx:] 类方法只能在主线程调用 \
-+[AsyncCoreData queryEntity:(NSString *)entityName xxxAsync:... completion:^(xxx){ xxx }]; 类异步方法暂时不要使用\
-
++[AsyncCoreData queryEntity:(NSString *)entityName xxxAsync:... completion:^(xxx){ xxx }]; 类异步方法暂时不要使用
+//同步
++(void)setPersistantStore:(nullable NSURL *)persistantFileUrl
+                withModel:(nonnull NSString *)modelName
+          icloudStoreName:(nullable NSString *)iName;
+//异步
 +(void)setPersistantStore:(nullable NSURL *)persistantFileUrl
                 withModel:(nonnull NSString *)modelName
           icloudStoreName:(nullable NSString *)iName

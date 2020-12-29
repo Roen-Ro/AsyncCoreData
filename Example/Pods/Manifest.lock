@@ -1,5 +1,5 @@
 PODS:
-  - AsyncCoreData (3.3.0)
+  - AsyncCoreData (3.3.1)
 
 DEPENDENCIES:
   - AsyncCoreData (from `../`)
@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  AsyncCoreData: 72eb2940c259b8030909e6cdb7f0b626937f6518
+  AsyncCoreData: c6d54099d14fe0617427f3784a5c6587ca7497c4
 
 PODFILE CHECKSUM: 02e78553917ef86134b8a16ad4e672bf74c57eec
 

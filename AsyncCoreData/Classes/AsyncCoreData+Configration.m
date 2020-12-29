@@ -25,14 +25,9 @@ NSMutableSet *disabledCacheEntities;
 
 @implementation AsyncCoreData (Configration)
 
-+(void)setPersistantStore:(nullable NSURL *)persistantFileUrl withModel:(nonnull NSString *)modelName completion:(void(^)(void))mainThreadBlock {
-    [self setPersistantStore:persistantFileUrl withModel:modelName icloudStoreName:nil completion:mainThreadBlock];
-}
-
 +(void)setPersistantStore:(nullable NSURL *)persistantFileUrl
                 withModel:(nonnull NSString *)modelName
-            icloudStoreName:(nullable NSString *)iName
-               completion:(void(^)(void))mainThreadBlock {
+          icloudStoreName:(nullable NSString *)iName {
     //清除之前的共享context
     [sharedMainContextMap removeObjectForKey:NSStringFromClass([self class])];
     
@@ -46,66 +41,77 @@ NSMutableSet *disabledCacheEntities;
     NSURL *coreDataModelFileUrl = [[NSBundle mainBundle] URLForResource:modelName withExtension:@"momd"];
     NSString *key = destUrl.absoluteString;
     
-    //定义具体执行业务的block 后续代码会保证这个block永远只会在同一个线程执行
-    void (^busniessBlock)(void) =  ^{
-        
-        NSPersistentStoreCoordinator *persistantStoreCord = [sPersistantStoreMap objectForKey:key];
-        BOOL needAddPst = NO;
-        if(!persistantStoreCord) {
-            needAddPst = YES;
-            NSManagedObjectModel *mobjModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:coreDataModelFileUrl];
-            
-            persistantStoreCord = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mobjModel];
-            
- //因为NSPersistentStoreCoordinatorStoresWillChangeNotification会在addPersistentStoreWithType时候触发，所以这里保存persistantStoreCord要在addPersistentStoreWithType 之前
-            [sPersistantStoreMap setObject:persistantStoreCord forKey:key];
-            
-        }
-        
-        NSString *classIndependentKey = NSStringFromClass([self class]);
-        NSPersistentStoreCoordinator *psc = [sPersistantStoreClassMap objectForKey:classIndependentKey];
-        
-        if(!psc || psc != persistantStoreCord) {
-            @synchronized(sPersistantStoreClassMap) {
-                [sPersistantStoreClassMap setObject:persistantStoreCord forKey:classIndependentKey];
-            }
-        }
-        
-        if(needAddPst) {
-            
-            NSError *error = nil;
-            NSDictionary *options;
-            if(iName){
-                options = @{NSMigratePersistentStoresAutomaticallyOption:@YES,
-                            NSInferMappingModelAutomaticallyOption:@YES,
-                            NSPersistentStoreUbiquitousContentNameKey:iName,
-                            };
-                
-                [self registerForiCloudNotificationsForPersistentCoordinator:persistantStoreCord];
-                
-                if(!iCloudEnabledClassMap)
-                    iCloudEnabledClassMap = [NSMutableDictionary dictionaryWithCapacity:3];
-                
-                
-                [iCloudEnabledClassMap setObject:@YES forKey:NSStringFromClass([self class])];
-            }
-            else {
-                options = @{NSMigratePersistentStoresAutomaticallyOption:@YES,
-                            NSInferMappingModelAutomaticallyOption:@YES,
-                            };
-                
-                [iCloudEnabledClassMap removeObjectForKey:NSStringFromClass([self class])];
-            }
 
-            [persistantStoreCord addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:destUrl options:options error:&error];
-             NSAssert(!error, @"persistentStoreCord error %@",error.description);
-        }
+    NSPersistentStoreCoordinator *persistantStoreCord = [sPersistantStoreMap objectForKey:key];
+    BOOL needAddPst = NO;
+    if(!persistantStoreCord) {
+        needAddPst = YES;
+        NSManagedObjectModel *mobjModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:coreDataModelFileUrl];
         
+        persistantStoreCord = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mobjModel];
         
-        main_task(mainThreadBlock);
-    };
+        //因为NSPersistentStoreCoordinatorStoresWillChangeNotification会在addPersistentStoreWithType时候触发，所以这里保存persistantStoreCord要在addPersistentStoreWithType 之前
+        [sPersistantStoreMap setObject:persistantStoreCord forKey:key];
+        
+    }
     
-    background_async(busniessBlock);
+    NSString *classIndependentKey = NSStringFromClass([self class]);
+    NSPersistentStoreCoordinator *psc = [sPersistantStoreClassMap objectForKey:classIndependentKey];
+    
+    if(!psc || psc != persistantStoreCord) {
+        @synchronized(sPersistantStoreClassMap) {
+            [sPersistantStoreClassMap setObject:persistantStoreCord forKey:classIndependentKey];
+        }
+    }
+    
+    if(needAddPst) {
+        
+        NSError *error = nil;
+        NSDictionary *options;
+        if(iName){
+            options = @{NSMigratePersistentStoresAutomaticallyOption:@YES,
+                        NSInferMappingModelAutomaticallyOption:@YES,
+                        NSPersistentStoreUbiquitousContentNameKey:iName,
+                        };
+            
+            [self registerForiCloudNotificationsForPersistentCoordinator:persistantStoreCord];
+            
+            if(!iCloudEnabledClassMap)
+                iCloudEnabledClassMap = [NSMutableDictionary dictionaryWithCapacity:3];
+            
+            
+            [iCloudEnabledClassMap setObject:@YES forKey:NSStringFromClass([self class])];
+        }
+        else {
+            options = @{NSMigratePersistentStoresAutomaticallyOption:@YES,
+                        NSInferMappingModelAutomaticallyOption:@YES,
+                        };
+            
+            [iCloudEnabledClassMap removeObjectForKey:NSStringFromClass([self class])];
+        }
+
+        [persistantStoreCord addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:destUrl options:options error:&error];
+         NSAssert(!error, @"persistentStoreCord error %@",error.description);
+    }
+        
+}
+
++(void)setPersistantStore:(nullable NSURL *)persistantFileUrl withModel:(nonnull NSString *)modelName {
+    [self setPersistantStore:persistantFileUrl withModel:modelName icloudStoreName:nil];
+}
+
++(void)setPersistantStore:(nullable NSURL *)persistantFileUrl withModel:(nonnull NSString *)modelName completion:(void(^)(void))mainThreadBlock {
+    [self setPersistantStore:persistantFileUrl withModel:modelName icloudStoreName:nil completion:mainThreadBlock];
+}
+
++(void)setPersistantStore:(nullable NSURL *)persistantFileUrl
+                withModel:(nonnull NSString *)modelName
+            icloudStoreName:(nullable NSString *)iName
+               completion:(void(^)(void))mainThreadBlock {
+    background_async(^{
+        [self setPersistantStore:persistantFileUrl withModel:modelName icloudStoreName:iName];
+        main_task(mainThreadBlock);
+    });
     
 #if 0
     //首先创建runloop, 保证所有任务都是在同一个线程执行

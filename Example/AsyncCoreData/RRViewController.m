@@ -71,10 +71,10 @@
     NSURL *dataBaseFileUrl = [self DataBaseFileForSegmentIndex:sender.selectedSegmentIndex];
     self.SubFixStr = [self.segControl titleForSegmentAtIndex:self.segControl.selectedSegmentIndex];
     
-    [AsyncCoreData setPersistantStore:dataBaseFileUrl withModel:@"RRCDModel" icloudStoreName:nil completion:^{
-        NSLog(@"Data Base changed to %@",dataBaseFileUrl.lastPathComponent);
-
-    }];
+    CFAbsoluteTime t0 = CFAbsoluteTimeGetCurrent();
+    [AsyncCoreData setPersistantStore:dataBaseFileUrl withModel:@"RRCDModel"];
+    CFAbsoluteTime t1 = CFAbsoluteTimeGetCurrent();
+    NSLog(@"Finished Set persistantStore at %@ in %.3f second",dataBaseFileUrl,t1-t0);
 }
 
 -(IBAction)moveDataBase:(UIButton *)sender {

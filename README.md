@@ -61,9 +61,7 @@
 NSURL *dataStoreUlr = [myDataDirectory URLByAppendingPathComponent:@"PrivateDataBase.sqlite"];
 
 //@“RRCDModel”为你在Xcode中创建的数据库模型文件名称，后缀.xcdatamodeld忽略
-[AsyncCoreData setPersistantStore:dataStoreUlr withModel:@"RRCDModel" completion:^{
-    NSLog(@"Core Data finished setup store");
-}];
+[AsyncCoreData setPersistantStore:dataStoreUlr withModel:@"RRCDModel"];
 ```
 有两个牛逼的地方需要注意：
 - `+[AsyncCoreData setPersistantStore: withModel:]` 这个类方法的调用时机是不受限制的，可以通过这个方法来切换数据库，例如在户外助手中，每个登录用户都有自己独立的数据库文件，这个时候，在切换了登录用的时候，就需要通过它来切换数据库。

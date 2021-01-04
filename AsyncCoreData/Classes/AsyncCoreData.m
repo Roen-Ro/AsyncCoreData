@@ -516,6 +516,7 @@ updateModelsWithPredicate:(nullable NSPredicate *)predicate
 //       NSAssert(DBModel.managedObjectContext, @"the NSManagedObject.managedObjectContext value is nil, which will cause fault value");
         //在执行block前要保证NSManagedObject.managedObjectContext依然存在，否则会引发fault data
         m = blk(nil, DBModel);
+        NSAssert(m, @"%@ returned nil model for entity:%@",blk,entityName);
         m.storeID = DBModel.objectID;
         [self cacheModel:m forEntity:entityName];
     }

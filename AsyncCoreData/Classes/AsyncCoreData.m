@@ -200,7 +200,7 @@ static NSRecursiveLock *sWriteLock;
 }
 
 +(NSError *)queryEntity:(NSString *)entityName saveModels:(nonnull NSArray<id<UniqueValueProtocol>> *)datas {
-    return [self queryEntity:entityName saveModels:datas inContext:[self getContext]];
+    return [self queryEntity:entityName saveModels:datas insertAnyway:NO inContext:[self getContext]];
 }
 
 
@@ -208,7 +208,7 @@ static NSRecursiveLock *sWriteLock;
     
    [self inter_doBackgroundTask:^{
        
-        NSError *e = [self queryEntity:entityName saveModels:datas inContext:[self getContext]];
+       NSError *e = [self queryEntity:entityName saveModels:datas insertAnyway:NO inContext:[self getContext]];
         main_task(^{
             if(block)
                 block(e);
@@ -217,8 +217,27 @@ static NSRecursiveLock *sWriteLock;
     
 }
 
++(nullable NSError *)queryEntity:(nonnull NSString *)entityName
+               createModelsAnyway:(nonnull NSArray<id<UniqueValueProtocol>> *)datas {
+    return [self queryEntity:entityName saveModels:datas insertAnyway:YES inContext:[self getContext]];
+}
+
++(void)queryEntity:(nonnull NSString *)entityName
+    createModelsAnywayAsync:(nonnull NSArray<id<UniqueValueProtocol>> *)datas
+        completion:(void (^_Nullable)(NSError *_Nullable))block {
+    [self inter_doBackgroundTask:^{
+        
+        NSError *e = [self queryEntity:entityName saveModels:datas insertAnyway:YES inContext:[self getContext]];
+         main_task(^{
+             if(block)
+                 block(e);
+         });
+     }];
+}
+
 +(NSError *)queryEntity:(NSString *)entityName
              saveModels:(nonnull NSArray<id<UniqueValueProtocol>> *)datas
+           insertAnyway:(BOOL)anyway
             inContext:(NSManagedObjectContext *)context
 {
     NSArray *dCopy = [NSArray arrayWithArray:datas];
@@ -228,8 +247,13 @@ static NSRecursiveLock *sWriteLock;
     
     BOOL usePredicateToFiltUniqueness = YES;
     NSEntityDescription *entity = [NSEntityDescription entityForName:entityName inManagedObjectContext:context];
+    if(anyway)
+        usePredicateToFiltUniqueness = NO;
+    else {
+        // do nothing
+    }
     
-//2020.09.29 commentted,
+//2020.09.29 注释, 利用xcode本身的constraints,会导致数据表里面依然有多条重复记录，只是有些记录被标记为falut，新插入的数据objectID也变了
 //为了兼容老版本，本来直接在xcode中设置entity的constraints就可以了
 //    if(entity.uniquenessConstraints.count > 0) {
 //        entity.uniquenessConstraints = @[@[@"uniqueID"]];

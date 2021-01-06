@@ -541,7 +541,7 @@
 				CODE_SIGN_ENTITLEMENTS = AsyncCoreData_Example.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 6575PQUVHG;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AsyncCoreData/AsyncCoreData-Prefix.pch";
 				INFOPLIST_FILE = "AsyncCoreData/AsyncCoreData-Info.plist";

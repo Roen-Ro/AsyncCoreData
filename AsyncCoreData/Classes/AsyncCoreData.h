@@ -42,6 +42,13 @@
    saveModelsAsync:(NSArray<id<UniqueValueProtocol>> *_Nonnull)datas
         completion:(void (^_Nullable)(NSError *_Nullable))block;
 
+//慎用，高效批量创建新数据，用在一次性创建大批量数据且数据不重复的情况，此方法会忽略uniqueValue的值，所有数据不判断重复直接插入
++(nullable NSError *)queryEntity:(nonnull NSString *)entityName
+               createModelsAnyway:(nonnull NSArray<id<UniqueValueProtocol>> *)datas;
+
++(void)queryEntity:(nonnull NSString *)entityName
+    createModelsAnywayAsync:(nonnull NSArray<id<UniqueValueProtocol>> *)datas
+        completion:(void (^_Nullable)(NSError *_Nullable))block;
 #pragma mark- delete
 
 /**

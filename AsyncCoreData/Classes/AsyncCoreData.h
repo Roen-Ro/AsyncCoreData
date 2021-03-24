@@ -122,7 +122,7 @@ modelsWithPredicateAsync:(nullable NSPredicate *)predicate
            inRange:(NSRange)range
          sortByKey:(nullable NSString *)sortKey
            reverse:(BOOL)reverse
-        completion:(void (^)(NSArray *))block;
+        completion:(void (^_Nonnull)(NSArray *_Nullable))block;
 
 
 /**
@@ -159,16 +159,19 @@ modelsWithPredicateAsync:(nullable NSPredicate *)predicate
 #pragma mark- statitic/massive
 
 //function could be @"max:" @"min:" @"count"() @"sum:"
-+(NSNumber *)queryEntity:(NSString *)entityName
-        valueWithFuction:(NSString *)func
-                  forKey:(NSString *)key
-           withPredicate:(NSPredicate *)predicate;
++(nonnull NSExpressionDescription *)expressionDescriptionOfFuction:(nonnull NSString *)func
+                                                        forKeyPath:(nonnull NSString *)keyPath;
 
-+(void)queryEntity:(NSString *)entityName
-    valueWithFuctionAsync:(NSString *)func
-            forKey:(NSString *)key
-     withPredicate:(NSPredicate *)predicate
-        completion:(void(^)(NSNumber * ))block;
++(nullable NSNumber *)queryEntity:(nonnull NSString *)entityName
+        valueWithFuction:(nonnull NSString *)func
+                  forKey:(nonnull NSString *)key
+           withPredicate:(nullable NSPredicate *)predicate;
+
++(void)queryEntity:(nonnull NSString *)entityName
+    valueWithFuctionAsync:(nonnull NSString *)func
+            forKey:(nonnull NSString *)key
+     withPredicate:(nullable NSPredicate *)predicate
+        completion:(void(^_Nullable)(NSNumber * _Nullable ))block;
 
 
 +(NSArray<NSDictionary *> *)queryEntity:(NSString *)entityName

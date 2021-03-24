@@ -816,7 +816,7 @@ numberOfItemsWithPredicate:(nullable NSPredicate *)predicate
 #pragma mark- statitic/massive
 
 
-+(NSExpressionDescription *)expressionDescriptionOfFuction:(NSString *)func forKeyPath:(NSString *)keyPath
++(nonnull NSExpressionDescription *)expressionDescriptionOfFuction:(nonnull NSString *)func forKeyPath:(nonnull NSString *)keyPath
 {
     NSExpression *keyPathExpression = [NSExpression expressionForKeyPath:keyPath];
     NSExpression *calExpression = [NSExpression expressionForFunction:func arguments:@[keyPathExpression]];

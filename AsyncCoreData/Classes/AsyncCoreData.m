@@ -862,7 +862,9 @@ numberOfItemsWithPredicate:(nullable NSPredicate *)predicate
     if(!error && results.count>0)
     {
         NSDictionary *rDic = [results firstObject];
-        id val = [rDic objectForKey:@"requestValue"];
+        id val = [rDic objectForKey:key];
+        if(!val)
+            val = [rDic objectForKey:@"requestValue"];
         return val;
     }
     return nil;

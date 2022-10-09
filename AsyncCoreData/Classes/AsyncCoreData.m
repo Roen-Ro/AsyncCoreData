@@ -9,7 +9,39 @@
 #import "AsyncCoreData.h"
 #import <objc/runtime.h>
 
+#define CXT_USE_PERFORM_WAIT 1 //NSManagedObjectContext启用performBlockAndWait的方式进行保存，更安全
+
 extern NSMutableSet *disabledCacheEntities;
+
+@interface NSManagedObjectContext (AsyncCoreData)
+-(BOOL)saveAndWait:(NSError **)error;
+@end
+
+@implementation NSManagedObjectContext (AsyncCoreData)
+
+-(BOOL)saveAndWait:(NSError **)error {
+    
+    BOOL retVal = NO;
+    BOOL *pRet = &retVal;
+    
+    NSError *outError;
+    __strong NSError **pError = &outError;
+    
+    [self performBlockAndWait:^{
+        NSError *e0;
+        *pRet = [self save:&e0];
+        
+        *pError = e0;
+    }];
+    
+    if(error != nil) {
+        *error = outError;
+    }
+    
+    return retVal;
+}
+
+@end
 
 @implementation NSObject (AsyncCoreData)
 
@@ -325,7 +357,12 @@ static NSRecursiveLock *sWriteLock;
         }
     }
     
+    
+#if CXT_USE_PERFORM_WAIT
+    BOOL r = [context saveAndWait:&retError];
+#else
     BOOL r = [context save:&retError];
+#endif
     
     if(r && modelArray_.count > 0) {
         NSInteger i = 0;
@@ -401,7 +438,14 @@ static NSRecursiveLock *sWriteLock;
             }
         }
     }
+    
+    
+#if CXT_USE_PERFORM_WAIT
+    [context saveAndWait:&retError];
+#else
     [context save:&retError];
+#endif
+    
     _remove_write_lock();
     
     return retError;
@@ -435,7 +479,13 @@ static NSRecursiveLock *sWriteLock;
         }
     }
     
+#if CXT_USE_PERFORM_WAIT
+    [context saveAndWait:&e];
+#else
     [context save:&e];
+#endif
+    
+    
     _remove_write_lock();
     return e;
 }
@@ -466,7 +516,12 @@ static NSRecursiveLock *sWriteLock;
         [context deleteObject:mobj];
     }
     
+#if CXT_USE_PERFORM_WAIT
+    [context saveAndWait:&e];
+#else
     [context save:&e];
+#endif
+    
     _remove_write_lock();
     return e;
 }
@@ -521,7 +576,12 @@ updateModelsWithPredicate:(nullable NSPredicate *)predicate
         }
     }
     
+#if CXT_USE_PERFORM_WAIT
+    [context saveAndWait:&e];
+#else
     [context save:&e];
+#endif
+    
     _remove_write_lock();
     return e;
     
@@ -946,7 +1006,12 @@ sumValuesForKeyPathes:(NSArray *)keyPathes
 +(NSError *)synchronizeinContext:(NSManagedObjectContext *)context
 {
     NSError *e;
+    
+#if CXT_USE_PERFORM_WAIT
+    [context saveAndWait:&e];
+#else
     [context save:&e];
+#endif
     return e;
 }
 
